@@ -209,7 +209,7 @@
   /* SD 캐릭터 : 작게 */
   .cd-sd {
     width: calc(var(--sd-w, 230px) * .6);
-    right: calc(var(--sd-w, 230px) * -.16);
+    right: calc(var(--sd-w, 230px) * -.04);
     bottom: calc(var(--sd-w, 230px) * -.14);
   }
 
@@ -229,7 +229,15 @@
     transform: none;
   }
   .ch-detail > * { transform: none; }
-  .dt-top { font-size: 13px; letter-spacing: 3px; }
+  /* 탭 줄 : 오른쪽 라벨(No. 01 / OWNER ID)은 윗줄, 탭은 아랫줄. 탭이 많으면 줄바꿈 */
+  .dt-top {
+    flex-wrap: wrap;
+    row-gap: 10px;
+    font-size: 13px;
+    letter-spacing: 3px;
+  }
+  .dt-top > *:not(.dt-tabs) { order: 1; flex: 1 1 100%; text-align: right; font-size: 11px; opacity: .6; }
+  .dt-top .dt-tabs { order: 2; flex: 1 1 100%; flex-wrap: wrap; row-gap: 16px; overflow: visible; }
   .dt-name { font-size: 32px; }
   .dt-intro { font-size: 14px; }
   .dt-list { grid-template-columns: auto 1fr; }
@@ -311,6 +319,50 @@
   .lv-panel { width: 94vw; height: 88vh; height: 88svh; }
   .lv-body { padding: 8px 16px 24px; }
   .lv-name { width: 72px; }
+
+
+  /* =========================================================
+     Owner 화면 (Character 화면 규칙을 같이 써요)
+     ========================================================= */
+  .ow-page .ch-stage,
+  .is-flipped .ow-page .ch-stage { left: auto; right: auto; top: auto; margin-top: 36px; }
+  .ow-page .ow-card .cd-flip { height: auto; width: min(290px, 74vw); }
+  .ow-strap { height: 64px; }
+
+  /* 뒤집으면 나오는 소개 */
+  .ow-page .ch-detail { left: auto; right: auto; }
+  .ow-page .ch-detail-bg { right: 0; clip-path: polygon(0 18vh, 100% 34vh, 100% 100%, 0 100%); }  /* Character와 반대 방향 대각선 */
+  .is-flipped .ow-hint { display: none; }
+  .ow-sub { font-size: 16px; }
+  .ow-notice li { font-size: 13px; padding-left: 34px; }
+  .bn-img { min-width: 0; }
+  .bn-friends { grid-template-columns: 1fr; }
+
+  /* '카드를 누르면…' 안내 : 카드 바로 아래 */
+  .ow-hint {
+    position: relative;
+    left: auto; right: auto; bottom: auto;
+    order: 5;
+    margin-top: 22px;
+  }
+
+
+  /* =========================================================
+     Guest 화면 (방명록)
+     ========================================================= */
+  .gb-page { height: auto; overflow: visible; }
+  .gb-wrap { width: 100%; padding: 36px 0 24px; }
+  .gb-head { margin-bottom: 24px; }
+  .gb-head h2 { font-size: clamp(38px, 12vw, 52px); }
+  .gb-head p { font-size: 12.5px; word-break: keep-all; }
+  .gb-grid { grid-template-columns: 1fr; gap: 28px; }   /* 글쓰기 위, 글 목록 아래 */
+  .gb-write { position: static; padding: 20px 18px 18px; }
+  .gb-field input,
+  .gb-field textarea { font-size: 16px; }    /* 아이폰에서 입력할 때 화면이 확대되지 않게 (16px 이상) */
+  .gb-item { padding: 14px 14px 12px; }
+  .gb-links.big { grid-template-columns: 1fr; }
+  .gb-links.big .gb-link { padding: 18px; }
+  .gb-links.big .gb-link-text strong { font-size: 16px; }
 }
 
 /* 아주 좁은 휴대폰 (폭 380px 이하) : 머리글 장식 선이 글자에 닿지 않게 숨김 */
