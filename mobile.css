@@ -1,0 +1,305 @@
+/* =========================================================
+   mobile.css — 휴대폰 화면(폭 768px 이하)용 덮어쓰기
+   ---------------------------------------------------------
+   · PC 화면에는 전혀 영향이 없어요. (아래 @media 안에서만 적용)
+   · 원본 style.css 는 그대로 두고, 여기서 필요한 부분만 바꿔요.
+   · 마음에 안 들면 index.html 의 mobile.css 한 줄만 지우면
+     원래대로 돌아가요.
+   · 적용 화면 : 메인 / Character / Pair
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+  /* ---------- 0. 공통 : 1200px 고정 풀기 + 세로 스크롤 ---------- */
+  html { height: auto; overflow-x: hidden; }
+  body {
+    min-width: 0;
+    min-height: 0;
+    height: auto;
+    overflow: visible;
+    overflow-x: clip;               /* 옆으로 삐져나가는 것 숨기기 */
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* 모든 화면의 큰 틀 : 위에서 아래로 차례대로 쌓기 */
+  .home {
+    height: auto;
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    padding: 20px 16px 48px;
+  }
+  .home > * { flex: 0 0 100%; min-width: 0; }
+
+  /* 원래 '화면 좌표에 고정'이던 요소들을 흐름 안으로 */
+  .deco-top-left,
+  .deco-top-right,
+  .deco-info,
+  .title-area,
+  .menu-area,
+  .ch-tiles,
+  .ch-stage,
+  .ch-detail,
+  .pr-center,
+  .pr-reviews {
+    position: relative;
+    top: auto; right: auto; bottom: auto; left: auto;
+  }
+
+  /* ---------- 1. 위쪽 머리글 (뱃지 + 라벨 / 오른쪽 글자) ---------- */
+  .deco-top-left {
+    flex: 1 1 0;
+    gap: 10px;
+    animation-name: fadeIn;
+  }
+  .badge { width: 40px; height: 40px; font-size: 15px; }
+  .top-label { font-size: 12px; letter-spacing: 2px; }
+  .top-line { min-width: 16px; }
+  .deco-top-right {
+    flex: 0 0 auto;
+    margin-left: 14px;
+    align-self: center;
+    font-size: 12px;
+    letter-spacing: 2px;
+    gap: 8px;
+  }
+  .mini-chev i { width: 7px; height: 7px; border-width: 2px; }
+  .deco-side { display: none; }      /* 왼쪽 세로 글자는 폭이 좁아 숨김 */
+
+
+  /* =========================================================
+     메인 화면
+     ========================================================= */
+  /* 메인은 오른쪽 글자(SINCE …)를 다음 줄 오른쪽 끝으로 */
+  body[data-page="home"] .deco-top-left { flex: 0 0 100%; }
+  body[data-page="home"] .deco-top-right {
+    flex: 0 0 100%;
+    margin: 10px 0 0;
+    justify-content: flex-end;
+  }
+
+  /* 타이틀 */
+  .title-area {
+    transform: none;
+    width: 100%;
+    margin: 56px 0 44px;
+  }
+  .title-inner { padding: 20px 26px 16px; max-width: 100%; }
+  .title-tag { font-size: 11px; letter-spacing: 3px; padding: 2px 9px 1px; }
+  .title-text { font-size: clamp(34px, 11vw, 56px); letter-spacing: -.5px; word-break: keep-all; }
+  .title-logo { max-width: 78vw; }
+  .title-sub { font-size: 12px; letter-spacing: 4px; gap: 10px; margin-top: 8px; }
+  .title-sub::before,
+  .title-sub::after { width: 22px; }
+  .corner { width: 16px; height: 16px; }
+
+  /* 메뉴 : 오른쪽 끝에 붙은 계단형 막대는 유지 */
+  .menu-area { margin-right: -16px; }   /* 막대가 화면 오른쪽 끝까지 닿게 */
+  .menu-list { gap: 12px; }
+  .menu-item {
+    width: min(100% - 22px, calc(74% + var(--i) * 7%));
+    height: 54px;
+  }
+  .menu-link { padding-left: 32px; padding-right: 14px; }
+  .menu-link::before { display: none; }        /* 왼쪽 점선은 공간이 없어 숨김 */
+  .menu-link:hover { transform: none; }        /* 터치에서 막대가 밀리지 않게 */
+  .menu-num { width: 32px; height: 32px; }
+  .menu-num span { font-size: 17px; }
+  .chevrons { margin-right: 10px; }
+  .chevrons i { width: 9px; height: 9px; border-width: 2.5px; }
+  .menu-title { font-size: 21px; letter-spacing: 1px; }
+  .menu-desc { font-size: 10px; }
+  .menu-icon { width: 30px; height: 30px; }
+
+  /* 소개 블록 : 메뉴 아래로 */
+  .deco-info {
+    order: 5;
+    width: 100%;
+    margin-top: 48px;
+  }
+  .info-heading { font-size: 26px; }
+  .info-text { font-size: 12.5px; }
+
+
+  /* =========================================================
+     Character 화면
+     ========================================================= */
+  /* 캐릭터 목록 : 가로로 넘겨 보는 한 줄 */
+  .ch-tiles {
+    width: auto;
+    margin: 18px -16px 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    -webkit-mask: linear-gradient(to right, transparent, #000 16px, #000 calc(100% - 16px), transparent);
+            mask: linear-gradient(to right, transparent, #000 16px, #000 calc(100% - 16px), transparent);
+  }
+  .ch-tiles-in {
+    min-height: 0;
+    width: max-content;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 6px 16px 10px;
+  }
+  .ch-tile-row,
+  .ch-tile-row.odd,
+  .ch-tile-row.even {
+    flex-direction: column-reverse;   /* 타일 위, 번호 아래 */
+    gap: 6px;
+    animation-name: fadeIn;
+  }
+  .ch-tile-label,
+  .ch-tile-row.odd .ch-tile-label,
+  .ch-tile-row.even .ch-tile-label {
+    width: auto;
+    justify-content: center;
+    text-align: center;
+    font-size: 10px;
+  }
+  .ch-tile { width: 108px; height: 46px; }
+  .ch-tile-name { opacity: 1; transform: none; padding: 0 10px; }   /* 터치 화면이라 이름 항상 보이기 */
+  .ch-tile-name b { font-size: 12px; }
+  .ch-tile-row:hover .ch-tile { transform: none; }
+
+  /* 카드를 뒤집어도 목록은 그대로 보이게 */
+  .is-flipped .ch-tiles { opacity: 1; transform: none; pointer-events: auto; }
+
+  /* 카드 무대 */
+  .ch-stage,
+  .is-flipped .ch-stage {
+    left: auto; right: auto;
+    margin-top: 28px;
+    padding: 0 0 12px;
+    transition: none;
+  }
+  .ch-holder,
+  .is-flipped .ch-holder,
+  .is-flipped .ch-holder[data-type="ticket"],
+  .is-flipped .ch-holder[data-type="custom-wide"] { transform: none; max-width: 100%; }
+
+  /* 카드 크기 : 화면 폭 기준으로 */
+  .cd-id .cd-flip      { width: min(300px, 76vw); height: auto; }
+  .cd-wanted .cd-flip  { width: min(330px, 82vw); height: auto; }
+  .cd-ticket .cd-flip  { width: min(560px, 92vw); }
+  .ch-holder[data-type="custom"] .cd-flip      { width: min(300px, 76vw) !important; height: auto !important; }
+  .ch-holder[data-type="custom-wide"] .cd-flip { width: 92vw !important; height: auto !important; }
+  .cd-flip:hover,
+  .cd-flip.flipped:hover { transform: none; }
+  .cd-flip.flipped:hover { transform: rotateY(180deg); }
+  .cd-hint { margin-top: 16px; font-size: 10px; letter-spacing: 3px; }
+
+  /* SD 캐릭터 : 작게 */
+  .cd-sd {
+    width: calc(var(--sd-w, 230px) * .6);
+    right: calc(var(--sd-w, 230px) * -.16);
+    bottom: calc(var(--sd-w, 230px) * -.14);
+  }
+
+  /* 뒤집었을 때 깔리는 대각선 색 배경 : 화면 전체 */
+  .ch-detail-bg {
+    position: fixed;
+    inset: 0;
+    left: 0;
+    clip-path: polygon(0 34vh, 100% 18vh, 100% 100%, 0 100%);
+  }
+
+  /* 상세 프로필 : 카드 아래로 */
+  .ch-detail { display: none; }
+  .is-flipped .ch-detail {
+    display: flex;
+    margin-top: 36px;
+    transform: none;
+  }
+  .ch-detail > * { transform: none; }
+  .dt-top { font-size: 13px; letter-spacing: 3px; }
+  .dt-name { font-size: 32px; }
+  .dt-intro { font-size: 14px; }
+  .dt-list { grid-template-columns: auto 1fr; }
+  .dt-row dd { padding-right: 0; }
+  .dt-quote { font-size: 15px; }
+  .dt-panes { overflow: visible; padding-right: 0; }
+  .dt-tabs { gap: 18px; overflow-x: auto; }
+  .dt-gallery { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* 이미지 크게 보기 */
+  .ch-box { gap: 0; }
+  .ch-box figure { max-width: 92vw; }
+  .box-img img { max-width: 92vw; max-height: 70vh; }
+  .box-empty { width: 80vw; height: 40vh; font-size: 20px; }
+  .box-close { top: 14px; right: 18px; }
+  .ch-box .box-prev,
+  .ch-box .box-next { position: absolute; bottom: 28px; }
+  .ch-box .box-prev { left: 20px; }
+  .ch-box .box-next { right: 20px; }
+
+
+  /* =========================================================
+     Pair 화면
+     ========================================================= */
+  /* 캐릭터 포스터 : 위쪽 가운데 */
+  .pr-center {
+    width: 100%;
+    margin-top: 28px;
+    order: 2;
+  }
+  .pr-frame { width: min(260px, 66vw); max-height: none; }
+  .pr-info,
+  .pr-nav { width: min(320px, 100%); }
+  .pr-info { text-align: center; }
+  .pr-no { top: 12px; font-size: 13px; }
+  .pr-name { font-size: 26px; }
+  .pr-nav { margin-top: 20px; }
+
+  /* 리뷰 목록 : 포스터 아래로 */
+  .pr-reviews {
+    order: 3;
+    width: 100%;
+    max-height: none;
+    margin: 32px 0 0;
+    overflow: visible;
+  }
+  .rvs-list { overflow: visible; }
+  .rv { padding: 12px 14px 10px; }
+  .rv-text { font-size: 13px; }
+
+  /* 리뷰를 누르면 열리는 관계 화면 */
+  .rl-close { top: 12px; right: 16px; font-size: 34px; }
+  .rl-in { width: 92vw; padding: 24px 0 60px; }
+  .rl-title h2 { font-size: clamp(30px, 9vw, 44px); }
+  .rl-title img { max-width: 80vw; max-height: 110px; }
+  .rl-hero, .rl-hero.n3, .rl-hero.n4 { min-height: 0; gap: 44px; padding: 56px 0 64px; }
+  .rc-wrap { flex: 0 0 94%; }
+  .rc { height: 112px; }
+  .rc-tag { font-size: 10px; top: -12px; }
+  .rc-name b { font-size: 18px; }
+  .rc-name small { font-size: 9px; }
+  .rc-desc { font-size: 11.5px; }
+  .rl-tabs { gap: 16px; overflow-x: auto; scrollbar-width: none; }
+  .rl-tabs::-webkit-scrollbar { display: none; }
+  .rl-tabs button { font-size: 15px; letter-spacing: 2px; white-space: nowrap; flex-shrink: 0; }
+  .dt-tabs button { white-space: nowrap; flex-shrink: 0; }
+  .rt-gallery { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .rt-trpg { grid-template-columns: 1fr; }
+  .rt-log { padding: 14px 16px; gap: 12px; }
+
+  /* 타임라인 : 날짜를 카드 위로 */
+  .rt-line { padding-left: 24px; }
+  .rt-line::before { left: 4px; }
+  .rt-line li::before { left: -24px; }
+  .rt-date { position: static; display: block; width: auto; margin-bottom: 4px; text-align: left; }
+  .rt-card img { max-width: 100%; }
+
+  /* TRPG 로그 보기 */
+  .lv-panel { width: 94vw; height: 88vh; height: 88svh; }
+  .lv-body { padding: 8px 16px 24px; }
+  .lv-name { width: 72px; }
+}
+
+/* 아주 좁은 휴대폰 (폭 380px 이하) : 머리글 장식 선이 글자에 닿지 않게 숨김 */
+@media (max-width: 380px) {
+  .ch-page .top-line,
+  .pr-page .top-line { display: none; }
+}
