@@ -990,7 +990,7 @@ const SITE = {
        gallery : 읽기 화면 아래 이미지 모음 [{ image: "주소", caption: "설명" }, …]
   */
   storyPage: {
-    menu: true,               // 메인 메뉴에 자동으로 보이기 (메인 메뉴에 #story 를 직접 넣었으면 그게 우선)
+    menu: true,               // 메인 메뉴에 Timeline 자동으로 붙이기 (편집기를 열면 메인 메뉴 목록으로 옮겨지고 false 가 돼요)
     menuTitle: "Timeline",    // 메인 메뉴 이름
     menuDesc: "천무의 기록",   // 메인 메뉴 아래 작은 설명
     menuIcon: "",             // 메인 메뉴 오른쪽 아이콘 (비우면 기본 아이콘)

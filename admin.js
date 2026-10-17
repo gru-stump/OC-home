@@ -71,7 +71,7 @@
     'stories.date': '시간 (예: 약 20년 전)', 'stories.title': '제목', 'stories.image': '대표 이미지',
     'stories.body': '본문 (줄마다 한 문단 · ― 한 줄은 장면 전환)', 'stories.gallery': '이미지 모음',
     'storyPage.label': '왼쪽 위 라벨', 'storyPage.heading': '큰 제목', 'storyPage.subText': '큰 제목 아래 글',
-    'storyPage.emptyText': '이야기가 없을 때 글', 'storyPage.menu': '메인 메뉴에 보이기',
+    'storyPage.emptyText': '이야기가 없을 때 글', 'storyPage.menu': '메인 메뉴에 자동으로 붙이기 (편집기 메인 메뉴로 옮긴 뒤엔 꺼져요)',
     'storyPage.menuTitle': '메인 메뉴 이름', 'storyPage.menuDesc': '메인 메뉴 설명', 'storyPage.menuIcon': '메인 메뉴 아이콘'
   };
   function labelOf(k, key) { return LABEL_IN[key + '.' + k] || LABEL[k] || k; }
@@ -436,7 +436,7 @@
       { name: '페어 메뉴', desc: '#pair', value: { num: '', title: 'Pair', desc: '페어 소개', link: '#pair', icon: '', newTab: false } },
       { name: '오너 메뉴', desc: '#owner', value: { num: '', title: 'Owner', desc: '오너 소개', link: '#owner', icon: '', newTab: false } },
       { name: '방명록 메뉴', desc: '#guest', value: { num: '', title: 'Guest', desc: '방명록', link: '#guest', icon: '', newTab: false } },
-      { name: '스토리 메뉴', desc: '#story', value: { num: '', title: 'Story', desc: '이야기', link: '#story', icon: '', newTab: false } },
+      { name: '타임라인(스토리) 메뉴', desc: '#story', value: storyMenuItem() },
       { name: '다른 사이트 링크', desc: '새 탭으로 열려요', value: { num: '', title: '', desc: '', link: 'https://', icon: '', newTab: true } }
     ];
     if (key === 'members') return [{ name: '캐릭터 선택', desc: '', value: 1 }];
@@ -445,6 +445,22 @@
     if (key === 'sample') return [{ name: '예시 글', desc: '', value: { time: '', name: '', message: '', reply: '' } }];
     if (LIST_TPL[key]) return [{ name: '추가', desc: '', value: LIST_TPL[key] }];
     return [];
+  }
+
+  /* 스토리(타임라인) 메뉴 : 사이트에서 자동으로 붙던 Timeline 메뉴를
+     편집기의 '메인 메뉴' 목록에 진짜 항목으로 한 번 넣어 줘요. (순서 바꾸기 · 지우기 가능)
+     넣은 뒤에는 storyPage.menu 를 false 로 바꿔서, 지워도 다시 생기지 않게 해요. */
+  function storyMenuItem() {
+    var P = st.draft.storyPage || {};
+    return { num: '', title: P.menuTitle || 'Timeline', desc: P.menuDesc || '', link: '#story', icon: P.menuIcon || '', newTab: false };
+  }
+  function addStoryMenu() {
+    var P = st.draft.storyPage, M = st.draft.menus;
+    if (!P || P.menu === false || !Array.isArray(M)) return false;
+    var has = M.some(function (m) { return /^#\/?story\b/.test(String(m && m.link || '')); });
+    if (!has) M.push(storyMenuItem());
+    P.menu = false;
+    return !has;
   }
 
   /* 캐릭터 순서를 바꾸거나 지울 때, 번호로 연결된 곳(페어 멤버 · 리뷰 · 관계 링크)을 같이 고쳐요 */
@@ -889,6 +905,7 @@
       if (!st.draft) {
         st.draft = clone(S);
         Object.keys(SKIP).forEach(function (k) { delete st.draft[k]; });
+        if (addStoryMenu()) setTimeout(function () { touch(); toast('메인 메뉴에 Timeline 메뉴를 넣었어요. 저장을 눌러 주세요.'); }, 0);
       }
       if (st.preview) {
         var ed = h('div', { class: 'oha-ed' });
