@@ -1256,12 +1256,14 @@ const SITE = {
        storyButton : 상세 화면의 이야기 연결 버튼 글자
        authorLabel / dateLabel / charLabel : 상세 화면 항목 이름
        protect     : true → 오른쪽 클릭 · 끌어서 저장 막기 (완벽하게 막을 수는 없어요)
+       thumbBg     : 투명 PNG 뒤 기본 배경색 (그림마다 bg 를 적으면 그게 우선)
        viewerColor : 상세 화면 바탕색 (비우면 대표 색에서 자동)
        pointColor  : AU · 버튼 강조색 (비우면 자동)
 
      ▸ artworks (그림 목록 · 위에서부터 순서대로)
        title   : 제목
        image   : 대표 이미지 (썸네일 · 상세 첫 장). 썸네일에 보일 부분은 편집기에서 맞춰요.
+       bg      : 배경색 (배경이 투명한 PNG 뒤에 깔 색, 예: "#f3ece6"). 비우면 thumbBg
        more    : 여러 장 묶음 [{ image: "주소", caption: "설명" }, …]
        author  : 작가
        date    : 날짜
@@ -1292,6 +1294,7 @@ const SITE = {
     dateLabel: "날짜",
     charLabel: "캐릭터",
     protect: true,
+    thumbBg: "",
     viewerColor: "",
     pointColor: ""
   },
@@ -1300,6 +1303,7 @@ const SITE = {
     {
       title: "천령 전신",
       image: "",
+      bg: "",
       more: [],
       author: "불가사리",
       date: "",
@@ -1314,6 +1318,7 @@ const SITE = {
     {
       title: "무영 전신",
       image: "",
+      bg: "",
       more: [],
       author: "불가사리",
       date: "",

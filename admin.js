@@ -70,7 +70,8 @@
     pin: '대표작으로 맨 위에 크게', hide: '가리기 (눌러야 보여요)', thumbRatio: '썸네일 모양', allText: '전체 버튼 글자',
     pickTitle: '대표작 제목', revealText: '눌러서 보기 글자', storyButton: '이야기 연결 버튼 글자',
     authorLabel: '작가 항목 이름', dateLabel: '날짜 항목 이름', charLabel: '캐릭터 항목 이름',
-    protect: '저장 방지 (오른쪽 클릭 · 끌기 막기)', viewerColor: '상세 화면 바탕색'
+    protect: '저장 방지 (오른쪽 클릭 · 끌기 막기)', viewerColor: '상세 화면 바탕색',
+    bg: '배경색 (투명 PNG 뒤)', thumbBg: '투명 PNG 뒤 기본 배경색'
   };
   /* 같은 칸 이름이라도 놓인 곳에 따라 다르게 부르는 이름 : '부모.칸' */
   var LABEL_IN = {
@@ -93,7 +94,8 @@
                      wantedPaper: 1, ownerImage: 1, menuIcon: 1 };
   /* 색 칸 : 색 선택기가 붙어요 */
   var COLOR_KEYS = { themeColor: 1, color: 1, subColor: 1, textColor: 1, overlayColor: 1, fadeColor: 1, gridColor: 1,
-                     cardColor: 1, readerColor: 1, pointColor: 1, lineColor: 1, viewerColor: 1 };
+                     cardColor: 1, readerColor: 1, pointColor: 1, lineColor: 1, viewerColor: 1,
+                     bg: 1, thumbBg: 1 };
   /* 고르는 칸 : 부모 이름.칸 이름 → 선택지 */
   var SELECTS = {
     'characters.type': [['id', '학생증 / 사원증'], ['ticket', '공연 티켓'], ['wanted', '수배지'], ['custom', '직접 만든 카드 · 캐릭터 이미지']],
@@ -450,7 +452,7 @@
     trpg: { title: '', system: 'CoC 7th', date: '', role: '', text: '', file: '', link: '' },
     sides: { catchphrase: '', desc: '', image: '' }, mine: { image: '', size: '200 × 40' }, friends: { name: '', image: '', url: '' },
     stories: { date: '', title: '', summary: '', pov: '', image: '', body: '', gallery: [] },
-    artworks: { title: '', image: '', more: [], author: '', date: '', au: '', chars: '', comment: '', story: '', pin: false, hide: false, hideText: '' },
+    artworks: { title: '', image: '', bg: '', more: [], author: '', date: '', au: '', chars: '', comment: '', story: '', pin: false, hide: false, hideText: '' },
     more: { image: '', caption: '' }
   };
 
@@ -531,6 +533,7 @@
 
   /* 칸이 없는 항목을 나중에 다시 꺼내 쓰는 "+ 항목 추가" 목록 */
   var OPTIONAL = {
+    artworks: { bg: '' },
     characters: { pairImage: '', sdSize: 230, subColor: '', textColor: '', seat: { gate: 'A', row: '01', seat: '01' },
                   customFront: '', customBack: '', customRatio: '', customSize: 100, customRadius: 12 }
   };

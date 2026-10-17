@@ -5,6 +5,7 @@
      --gl-viewer : 상세 화면 바탕 (galleryPage.viewerColor)
      --gl-point  : AU · 버튼 강조색 (galleryPage.pointColor)
    썸네일 모양 : galleryPage.thumbRatio  ("3 / 4", "1 / 1", "auto" = 원본 비율)
+   투명 PNG 배경 : 그림마다 artworks[].bg, 기본은 galleryPage.thumbBg  (--art-bg)
    ========================================================= */
 
 .gl-page { height: 100vh; overflow-y: auto; scrollbar-width: thin; }
@@ -412,3 +413,11 @@
   .gv-arrow.next { right: -6px; }
   .gv-info h3 { font-size: 22px; }
 }
+
+
+/* ---------- 투명 PNG 뒤 배경색 ----------
+   그림의 '배경색'(또는 갤러리 기본 배경색)을 정하면
+   썸네일과 상세 화면 이미지 뒤에 그 색이 깔려요.
+   ----------------------------------------- */
+.gl-thumb.has-bg { background: var(--art-bg); }
+.gv-fig.has-bg .gv-img { background: var(--art-bg); }

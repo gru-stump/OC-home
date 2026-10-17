@@ -20,6 +20,10 @@ window.OC_GALLERY = (function () {
     const ALL = P.allText || "ALL";
     const ratio = /^\d+(\.\d+)? \/ \d+(\.\d+)?$/.test(P.thumbRatio || "") ? P.thumbRatio : (P.thumbRatio === "auto" ? "auto" : "3 / 4");
     const protect = P.protect !== false;
+    /* 투명 PNG 뒤 배경색 : 그림에 적은 색 → 없으면 갤러리 기본 배경색 → 없으면 은은한 기본 */
+    const COLOR = /^#[0-9a-f]{3}([0-9a-f]{3})?([0-9a-f]{2})?$/i;
+    const bgOf = function (x) { const c = String((x && x.bg) || P.thumbBg || "").trim(); return COLOR.test(c) ? c : ""; };
+    const bgStyle = function (x) { const c = bgOf(x); return c ? ' style="--art-bg:' + c + '"' : ""; };
 
     /* 묶음 : 대표 이미지 + 더 넣은 이미지 */
     const list = (S.artworks || []).filter(function (x) { return x && (x.image || x.title); }).map(function (x, i) {
@@ -67,7 +71,7 @@ window.OC_GALLERY = (function () {
         ? '<img src="' + attr(x.image) + '" alt="" loading="lazy" draggable="false"' + cut + '>'
         : '<span class="gl-noimg">NO IMAGE</span>';
       return '<button class="gl-card' + (big ? " is-pick" : "") + (veiled(o) ? " is-veiled" : "") + '" type="button" data-i="' + o.i + '">' +
-        '<span class="gl-thumb">' + img +
+        '<span class="gl-thumb' + (bgOf(x) ? " has-bg" : "") + '"' + bgStyle(x) + '>' + img +
           (veiled(o) ? '<span class="gl-veil"><b>' + (x.hideText || P.hideText || "가려진 그림") + '</b><small>' + (P.revealText || "눌러서 보기") + '</small></span>' : "") +
           (o.imgs.length > 1 ? '<span class="gl-multi" title="여러 장">' + o.imgs.length + '</span>' : "") +
         '</span>' +
@@ -137,7 +141,7 @@ window.OC_GALLERY = (function () {
         '<div class="gv-in">' +
           '<div class="gv-stage">' +
             '<button class="gv-arrow prev" type="button" aria-label="이전"><i></i></button>' +
-            '<figure class="gv-fig' + (hidden ? " is-veiled" : "") + '">' +
+            '<figure class="gv-fig' + (hidden ? " is-veiled" : "") + (bgOf(x) ? " has-bg" : "") + '"' + bgStyle(x) + '>' +
               (im.image ? '<img class="gv-img" src="' + attr(im.image) + '" alt="" draggable="false">' : '<span class="gl-noimg">NO IMAGE</span>') +
               (hidden ? '<button class="gv-reveal" type="button"><b>' + (x.hideText || P.hideText || "가려진 그림") + '</b><small>' + (P.revealText || "눌러서 보기") + '</small></button>' : "") +
               (im.caption ? '<figcaption>' + im.caption + '</figcaption>' : "") +
