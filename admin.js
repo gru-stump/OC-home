@@ -462,7 +462,7 @@
      - 정사각형 썸네일과 같은 모양의 상자에서 사진을 끌어 옮기고,
        '확대' 막대(또는 마우스 휠)로 원하는 만큼만 잘라요.
      - 값은 pos("가로% 세로%")와 zoom(1~5)으로 저장돼요.
-     - 원본 파일은 그대로, 사이트에서 썸네일과 크게 보기 모두 이 영역만 보여줘요.
+     - 원본 파일은 그대로, 사이트에서 썸네일만 이 영역으로 잘려요. (크게 보기는 원본 전체)
      ========================================================== */
   function parsePos(p) {
     var m = /^(\d{1,3})% (\d{1,3})%$/.exec(p || '');
@@ -492,7 +492,7 @@
       range.value = String(zm);
       var cut = !!obj.pos || zm > 1;
       val.textContent = cut ? '확대 ' + zm.toFixed(2).replace(/\.?0+$/, '') + '배 · 가로 ' + xy[0] + '% · 세로 ' + xy[1] + '%'
-                            : '자르지 않음 (크게 보기에서는 원본 전체)';
+                            : '자르지 않음 (가운데 기준)';
     }
     function save() {
       obj.pos = xy[0] + '% ' + xy[1] + '%';
@@ -549,7 +549,7 @@
     var el = h('div', { style: 'display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap' }, [
       frame, empty,
       h('div', { style: 'display:flex;flex-direction:column;gap:8px' }, [
-        h('div', { style: 'font-size:12px;color:#888;line-height:1.5', text: '사진을 끌어 옮기고, 확대해서 보여줄 부분만 잘라요. 썸네일과 크게 보기 모두 이 영역만 보여요.' }),
+        h('div', { style: 'font-size:12px;color:#888;line-height:1.5', text: '사진을 끌어 옮기고, 확대해서 썸네일에 보여줄 부분만 잘라요. 눌러서 크게 볼 때는 원본 전체가 나와요.' }),
         h('div', { style: 'display:flex;gap:6px;align-items:center;font-size:12px;color:#555' }, ['확대', minus, range, plus]),
         val,
         h('div', { style: 'display:flex;gap:6px;flex-wrap:wrap' }, [top, center, clear])
