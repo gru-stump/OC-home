@@ -11,6 +11,23 @@
    ----------------------------------------- */
 .cd-custom.cx-solo { --rot: 0deg; }
 
+/* 캐릭터 이미지 카드는 화면을 크게 차지하게 (원래 카드는 화면 높이의 60% 정도)
+   · PC : 화면 높이에서 위·아래 여백만 빼고 거의 꽉 차게
+   · 가로로 긴 그림은 화면 폭의 62%까지 */
+.cd-custom.cx-solo .cd-flip {
+  height: min(860px, calc(100vh - 170px)) !important;
+  width: auto !important;
+  max-width: min(1000px, 62vw);
+}
+/* 휴대폰 : 화면 폭 가득 */
+@media (max-width: 768px) {
+  .ch-holder[data-type] .cd-custom.cx-solo .cd-flip {
+    width: min(440px, 90vw) !important;
+    height: auto !important;
+    max-width: none;
+  }
+}
+
 
 /* ---------- 갤러리 이미지 자르기 ----------
    편집기 '보이는 위치'에서 정한 영역만 보여줘요. (addon.js 의 OC_CROP)
