@@ -65,6 +65,7 @@
     summary: '한줄요약', pov: '시점 · 작은 머리말', readMore: '카드 안내 글자', bodyEmpty: '본문이 비었을 때 글',
     galleryTitle: '이미지 모음 제목', prevText: '이전 버튼 글자', nextText: '다음 버튼 글자',
     cardColor: '카드 바탕색', readerColor: '읽기 화면 바탕색', pointColor: '날짜 · 점 색', lineColor: '시간선 색',
+    hoverColor: '마우스 올렸을 때 강조색', cardOpacity: '카드 바탕 진하기',
     /* 갤러리 페이지 (gallery.js) */
     more: '여러 장 묶음 (더 넣을 이미지)', author: '작가', au: 'AU', chars: '등장 캐릭터', comment: '짧은 코멘트',
     pin: '대표작으로 맨 위에 크게', hide: '가리기 (눌러야 보여요)', thumbRatio: '썸네일 모양', allText: '전체 버튼 글자',
@@ -94,7 +95,7 @@
                      wantedPaper: 1, ownerImage: 1, menuIcon: 1 };
   /* 색 칸 : 색 선택기가 붙어요 */
   var COLOR_KEYS = { themeColor: 1, color: 1, subColor: 1, textColor: 1, overlayColor: 1, fadeColor: 1, gridColor: 1,
-                     cardColor: 1, readerColor: 1, pointColor: 1, lineColor: 1, viewerColor: 1,
+                     cardColor: 1, readerColor: 1, pointColor: 1, lineColor: 1, viewerColor: 1, hoverColor: 1,
                      bg: 1, thumbBg: 1 };
   /* 고르는 칸 : 부모 이름.칸 이름 → 선택지 */
   var SELECTS = {
@@ -651,6 +652,7 @@
   /* 막대로 조절하는 칸 : 최소 · 최대 · 간격 · 단위 · 기본값 (page: 캐릭터 페이지 설정을 따를 수 있음) */
   var RANGES = {
     customSize: { min: 30, max: 100, step: 5, unit: '%', def: 100, hint: '100% = 화면에 들어가는 최대 크기' },
+    cardOpacity: { min: 30, max: 100, step: 5, unit: '%', def: 85, hint: '낮을수록 뒤 배경이 비쳐요 · 마우스를 올리면 진해져요' },
     sdSize: { min: 60, max: 400, step: 10, unit: 'px', def: 230, page: true, hint: 'SD 가로 크기' },
     sdX: { min: -200, max: 200, step: 5, unit: 'px', def: 0, page: true, hint: '− 왼쪽 · + 오른쪽' },
     sdY: { min: -200, max: 200, step: 5, unit: 'px', def: 0, page: true, hint: '− 위 · + 아래' }

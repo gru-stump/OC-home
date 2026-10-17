@@ -978,6 +978,8 @@ const SITE = {
        readerColor : 읽기 화면 바탕색   (비우면 자동)
        pointColor  : 날짜 · 점 색       (비우면 자동)
        lineColor   : 시간선 색          (비우면 꾸밈 글자 색)
+       hoverColor  : 카드에 마우스를 올렸을 때 테두리 · 날짜 · 제목 밑줄 색 (비우면 대표 색에서 자동)
+       cardOpacity : 카드 바탕 진하기 30~100 (낮을수록 뒤 배경이 비쳐요, 올리면 진해져요)
 
      ▸ stories (이야기 목록 · 위에서부터 시간 순서대로)
        date    : 시간 (예: "약 20년 전", "과거의 언젠가")
@@ -1007,7 +1009,9 @@ const SITE = {
     cardColor: "",
     readerColor: "",
     pointColor: "",
-    lineColor: ""
+    lineColor: "",
+    hoverColor: "",
+    cardOpacity: 85
   },
 
   stories: [

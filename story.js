@@ -43,6 +43,9 @@ window.OC_STORY = (function () {
     set("--st-reader", P.readerColor || (mix ? mix(THEME, "#070707", 0.86) : "#0e0e0e"));
     set("--st-point", P.pointColor || (mix ? mix(THEME, "#ffffff", 0.38) : "#bbbbbb"));
     set("--st-line", P.lineColor || "var(--deco)");
+    set("--st-hover", P.hoverColor || (mix ? mix(THEME, "#ffffff", 0.16) : "#888888"));
+    const op = parseFloat(P.cardOpacity);
+    set("--st-alpha", (isFinite(op) ? Math.max(30, Math.min(100, op)) : 85) + "%");
 
     /* ----- 왼쪽 위 꾸밈 + 번호 ----- */
     document.getElementById("decoTopLeft").innerHTML =
