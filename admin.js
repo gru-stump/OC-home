@@ -35,7 +35,7 @@
     sd: 'SD 이미지', tile: '타일 이미지', tilePosition: '타일 사진 위치', name: '이름', nameEn: '영문 이름 / 직책',
     intro: '한 줄 소개', tags: '태그', seat: '좌석', gate: '입구', row: '열', number: '카드 번호',
     profile: '프로필 항목', value: '내용', quote: '대표 대사', story: '설정 글', gallery: '갤러리', caption: '이미지 설명',
-    pos: '보이는 위치', relations: '관계', customFront: '앞면 이미지', customBack: '뒷면 이미지', customRatio: '카드 비율',
+    pos: '보이는 영역 · 자르기', zoom: '확대', relations: '관계', customFront: '앞면 이미지', customBack: '뒷면 이미지', customRatio: '카드 비율',
     customRadius: '모서리 둥글기', pairImage: '페어 페이지 사진',
     emptyText: '비었을 때 글', reviewTitle: '리뷰 목록 제목', sortText: '정렬 글자', replyButton: '답글 버튼 글자',
     bestCount: 'BEST 표시 개수', relationTabs: '관계 화면 탭 이름', timelineEmpty: '타임라인 비었을 때 글',
@@ -369,7 +369,7 @@
     return { members: m, pairName: '', pairNameSub: '', titleImage: '', label: '', sides: sides, reviews: [], gallery: [], timeline: [], trpg: [] };
   }
   var LIST_TPL = {
-    gallery: { image: '', caption: '', pos: '50% 50%' }, relations: { name: '', label: '', text: '', image: '', link: 0 },
+    gallery: { image: '', caption: '' }, relations: { name: '', label: '', text: '', image: '', link: 0 },
     profile: { label: '', value: '' }, reviews: { from: 1, to: 2, call: '', review: '', likes: 0, date: '', replies: [] },
     timeline: { date: '', title: '', text: '', image: '' },
     trpg: { title: '', system: 'CoC 7th', date: '', role: '', text: '', file: '', link: '' },
@@ -432,44 +432,79 @@
   };
 
   /* ==========================================================
-     갤러리 이미지 '보이는 위치' 맞추기
-     - 정사각형 썸네일과 같은 모양의 상자에서 이미지를 끌어 옮겨요.
-     - 값은 pos 칸에 "가로% 세로%" 로 저장돼요. (예: "50% 20%" → 위쪽이 보이게)
+     갤러리 이미지 자르기 (보이는 영역 + 확대)
+     - 정사각형 썸네일과 같은 모양의 상자에서 사진을 끌어 옮기고,
+       '확대' 막대(또는 마우스 휠)로 원하는 만큼만 잘라요.
+     - 값은 pos("가로% 세로%")와 zoom(1~5)으로 저장돼요.
+     - 원본 파일은 그대로, 사이트에서 썸네일과 크게 보기 모두 이 영역만 보여줘요.
      ========================================================== */
   function parsePos(p) {
     var m = /^(\d{1,3})% (\d{1,3})%$/.exec(p || '');
     return m ? [Math.min(100, +m[1]), Math.min(100, +m[2])] : [50, 50];
   }
+  function parseZoom(z) { z = parseFloat(z); return isFinite(z) && z > 1 ? Math.min(5, z) : 1; }
   function posPicker(obj) {
-    var xy = parsePos(obj.pos);
+    var xy = parsePos(obj.pos), zm = parseZoom(obj.zoom);
     var img = h('img', { alt: '', draggable: 'false',
       style: 'width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;user-select:none' });
-    var frame = h('div', { title: '끌어서 보일 위치를 맞춰요',
-      style: 'position:relative;width:160px;height:160px;border-radius:8px;overflow:hidden;background:#eee;cursor:grab;touch-action:none;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)' }, [img]);
+    var frame = h('div', { title: '끌어서 보일 부분을 맞춰요',
+      style: 'position:relative;width:180px;height:180px;border-radius:8px;overflow:hidden;background:#eee;cursor:grab;touch-action:none;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)' }, [img]);
     var val = h('div', { style: 'font-size:12px;color:#666' });
     var empty = h('div', { style: 'font-size:12px;color:#999', text: '이미지를 먼저 넣어 주세요.' });
-    var reset = h('button', { class: 'oha-mini', type: 'button', text: '가운데로' });
+    var range = h('input', { type: 'range', min: '1', max: '5', step: '0.05', style: 'width:150px' });
+    var minus = h('button', { class: 'oha-mini', type: 'button', text: '−' });
+    var plus = h('button', { class: 'oha-mini', type: 'button', text: '+' });
     var top = h('button', { class: 'oha-mini', type: 'button', text: '위쪽' });
+    var center = h('button', { class: 'oha-mini', type: 'button', text: '가운데로' });
+    var clear = h('button', { class: 'oha-mini', type: 'button', text: '자르기 없애기' });
+
     function show() {
-      img.style.objectPosition = xy[0] + '% ' + xy[1] + '%';
-      val.textContent = '가로 ' + xy[0] + '% · 세로 ' + xy[1] + '%';
+      var p = xy[0] + '% ' + xy[1] + '%';
+      img.style.objectPosition = p;
+      img.style.transformOrigin = p;
+      img.style.transform = 'scale(' + zm + ')';
+      range.value = String(zm);
+      var cut = !!obj.pos || zm > 1;
+      val.textContent = cut ? '확대 ' + zm.toFixed(2).replace(/\.?0+$/, '') + '배 · 가로 ' + xy[0] + '% · 세로 ' + xy[1] + '%'
+                            : '자르지 않음 (크게 보기에서는 원본 전체)';
     }
-    function save() { obj.pos = xy[0] + '% ' + xy[1] + '%'; show(); touch(); }
+    function save() {
+      obj.pos = xy[0] + '% ' + xy[1] + '%';
+      obj.zoom = Math.round(zm * 100) / 100;
+      show(); touch();
+    }
     function refresh() {
       var has = !!obj.image;
       frame.style.display = has ? '' : 'none'; empty.style.display = has ? 'none' : '';
       if (has && img.getAttribute('src') !== obj.image) img.src = obj.image;
       show();
     }
-    reset.onclick = function () { xy = [50, 50]; save(); };
-    top.onclick = function () { xy = [xy[0], 15]; save(); };
+    function setZoom(z) { zm = Math.max(1, Math.min(5, Math.round(z * 100) / 100)); save(); }
 
-    /* 끌기 : 손가락 / 마우스를 움직인 만큼 사진이 따라 움직여요 */
+    range.oninput = function () { zm = parseFloat(range.value) || 1; show(); };
+    range.onchange = function () { setZoom(parseFloat(range.value) || 1); };
+    minus.onclick = function () { setZoom(zm - 0.25); };
+    plus.onclick = function () { setZoom(zm + 0.25); };
+    top.onclick = function () { xy = [xy[0], 10]; save(); };
+    center.onclick = function () { xy = [50, 50]; save(); };
+    clear.onclick = function () { xy = [50, 50]; zm = 1; delete obj.pos; delete obj.zoom; show(); touch(); };
+
+    /* 마우스 휠로 확대 / 축소 */
+    var wheelT = null;
+    frame.addEventListener('wheel', function (e) {
+      if (!img.naturalWidth) return;
+      e.preventDefault();
+      zm = Math.max(1, Math.min(5, zm * (e.deltaY < 0 ? 1.08 : 1 / 1.08)));
+      show();
+      clearTimeout(wheelT); wheelT = setTimeout(function () { setZoom(zm); }, 250);
+    }, { passive: false });
+
+    /* 끌기 : 손가락 / 마우스를 움직인 만큼 사진이 따라 움직여요 (확대한 만큼 계산) */
     var drag = null;
     frame.addEventListener('pointerdown', function (e) {
       if (!img.naturalWidth) return;
       var W = frame.clientWidth, H = frame.clientHeight;
-      var sc = Math.max(W / img.naturalWidth, H / img.naturalHeight);
+      var sc = Math.max(W / img.naturalWidth, H / img.naturalHeight) * zm;
       drag = { x: e.clientX, y: e.clientY, sx: xy[0], sy: xy[1],
                ox: img.naturalWidth * sc - W, oy: img.naturalHeight * sc - H };   /* 상자 밖으로 남는 길이 */
       frame.setPointerCapture(e.pointerId); frame.style.cursor = 'grabbing'; e.preventDefault();
@@ -488,8 +523,10 @@
     var el = h('div', { style: 'display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap' }, [
       frame, empty,
       h('div', { style: 'display:flex;flex-direction:column;gap:8px' }, [
-        h('div', { style: 'font-size:12px;color:#888;line-height:1.5', text: '사진을 끌어서 썸네일에 보일 부분을 맞춰요.' }),
-        val, h('div', { style: 'display:flex;gap:6px' }, [top, reset])
+        h('div', { style: 'font-size:12px;color:#888;line-height:1.5', text: '사진을 끌어 옮기고, 확대해서 보여줄 부분만 잘라요. 썸네일과 크게 보기 모두 이 영역만 보여요.' }),
+        h('div', { style: 'display:flex;gap:6px;align-items:center;font-size:12px;color:#555' }, ['확대', minus, range, plus]),
+        val,
+        h('div', { style: 'display:flex;gap:6px;flex-wrap:wrap' }, [top, center, clear])
       ])
     ]);
     refresh();
@@ -503,7 +540,7 @@
       /* 갤러리 항목이면 '보이는 위치' 맞추기 상자를 붙여요 */
       var picker = (key === 'gallery' && 'image' in obj) ? posPicker(obj) : null;
       Object.keys(obj).forEach(function (k) {
-        if (picker && k === 'pos') return;               /* pos 는 상자로 맞추니 글자 칸은 숨겨요 */
+        if (picker && (k === 'pos' || k === 'zoom')) return;   /* 자르기 값은 상자로 맞추니 글자 칸은 숨겨요 */
         var v = obj[k];
         var complex = v && typeof v === 'object';
         var ed = valueEd(v, function (nv) { obj[k] = nv; if (picker && k === 'image') picker.refresh(); }, k, key);

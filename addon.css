@@ -10,3 +10,38 @@
    · 뒤집어도 같은 캐릭터 이미지가 보여요. (상세 프로필은 그대로 열려요)
    ----------------------------------------- */
 .cd-custom.cx-solo { --rot: 0deg; }
+
+
+/* ---------- 갤러리 이미지 자르기 ----------
+   편집기 '보이는 위치'에서 정한 영역만 보여줘요. (addon.js 의 OC_CROP)
+   --p : 보이는 위치   --z : 확대 배율
+   원본 파일은 그대로, 화면에서만 잘라 보여줘요.
+   ----------------------------------------- */
+img.oc-crop {
+  object-fit: cover;
+  object-position: var(--p, 50% 50%);
+  transform: scale(var(--z, 1));
+  transform-origin: var(--p, 50% 50%);
+}
+/* 썸네일에 마우스를 올리면 살짝 커지는 효과는 그대로 */
+.dt-shot:hover img.oc-crop,
+.rt-shot:hover img.oc-crop { transform: scale(calc(var(--z, 1) * 1.06)); }
+
+/* 크게 보기 : 자른 정사각형만 크게 */
+.box-crop {
+  width: min(72vw, 78vh);
+  aspect-ratio: 1;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0,0,0,.5);
+}
+.box-crop img.oc-crop {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  box-shadow: none;
+}
+@media (max-width: 768px) {
+  .box-crop { width: min(92vw, 70vh); }
+}
