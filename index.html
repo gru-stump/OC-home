@@ -743,6 +743,12 @@
         const probe = new Image();
         probe.onload = function () { if (probe.naturalHeight) apply(probe.naturalWidth / probe.naturalHeight); };
         probe.src = ch.customFront;
+        /* 뒷면 그림이 따로 있으면, 뒤집었을 때 카드 모양을 뒷면 그림 비율로 (addon.css 의 --rb) */
+        if (ch.customBack && ch.customBack !== ch.customFront) {
+          const pb = new Image();
+          pb.onload = function () { if (pb.naturalHeight) flipEl.style.setProperty("--rb", String(pb.naturalWidth / pb.naturalHeight)); };
+          pb.src = ch.customBack;
+        }
       }
 
       /* =====================================================
@@ -1621,6 +1627,12 @@
         const probe = new Image();
         probe.onload = function () { if (probe.naturalHeight) apply(probe.naturalWidth / probe.naturalHeight); };
         probe.src = ch.customFront;
+        /* 뒷면 그림이 따로 있으면, 뒤집었을 때 카드 모양을 뒷면 그림 비율로 (addon.css 의 --rb) */
+        if (ch.customBack && ch.customBack !== ch.customFront) {
+          const pb = new Image();
+          pb.onload = function () { if (pb.naturalHeight) flipEl.style.setProperty("--rb", String(pb.naturalWidth / pb.naturalHeight)); };
+          pb.src = ch.customBack;
+        }
       }
 
 

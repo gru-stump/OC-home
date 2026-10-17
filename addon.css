@@ -22,11 +22,16 @@
   width: calc(min(62vw, 1000px, (100vh - 170px) * var(--r, .7), 860px * var(--r, .7)) * var(--cx-size, 1)) !important;
   height: auto !important;
 }
-/* 뒤집어서 옆에 상세 프로필이 나올 때는 그 칸 안에 들어가게 */
+/* 뒤집었을 때 (뒷면)
+   · 카드 모양 : 뒷면 그림 비율(--rb). 비율을 직접 고른 경우나 뒷면이 비면 앞면과 같아요.
+   · 크기 : 옆에 상세 프로필이 나오는 칸(화면 폭 약 44%) 안에서 최대한 크게.
+            원래 카드처럼 한 번 더 줄이지(82%) 않아요. */
 .is-flipped .cd-custom .cd-flip {
-  width: calc(min(44vw, (100vh - 170px) * var(--r, .7), 860px * var(--r, .7)) * var(--cx-size, 1)) !important;
+  aspect-ratio: var(--rb, var(--r, .7)) !important;
+  width: calc(min(44vw, (100vh - 170px) * var(--rb, var(--r, .7)), 860px * var(--rb, var(--r, .7))) * var(--cx-size, 1)) !important;
 }
-.is-flipped .ch-holder[data-type="custom-wide"] { transform: scale(.82); }
+.is-flipped .ch-holder[data-type="custom"],
+.is-flipped .ch-holder[data-type="custom-wide"] { transform: none; }
 @media (max-width: 768px) {
   .ch-holder[data-type] .cd-custom .cd-flip,
   .is-flipped .ch-holder[data-type] .cd-custom .cd-flip {
