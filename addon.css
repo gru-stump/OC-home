@@ -74,3 +74,23 @@ img.oc-crop {
 @media (max-width: 768px) {
   .box-crop { width: min(92vw, 70vh); }
 }
+
+
+/* ---------- SD 이미지 위치 · 크기 ----------
+   편집기의 'SD 위치' · 'SD 가로/세로 미세조정' (addon.js 의 OC_SD)
+   기본은 원래처럼 카드 오른쪽 아래.
+   ----------------------------------------- */
+.cd-sd { translate: var(--sd-x, 0px) var(--sd-y, 0px); }
+/* 왼쪽에 붙을 때는 반대로 살짝 기울여요 */
+.cd-sd.sd-lb,
+.cd-sd.sd-lt { right: auto; left: calc(var(--sd-w, 230px) * -0.38); }
+.cd-sd.sd-rt,
+.cd-sd.sd-lt { bottom: auto; top: calc(var(--sd-w, 230px) * -0.22); }
+.is-flipped .cd-sd.sd-lb, .sd-always .cd-sd.sd-lb,
+.is-flipped .cd-sd.sd-lt, .sd-always .cd-sd.sd-lt { transform: scale(1) rotate(-6deg); }
+@media (max-width: 768px) {
+  .cd-sd.sd-lb,
+  .cd-sd.sd-lt { left: calc(var(--sd-w, 230px) * -.04); right: auto; }
+  .cd-sd.sd-rt,
+  .cd-sd.sd-lt { top: calc(var(--sd-w, 230px) * -.14); bottom: auto; }
+}

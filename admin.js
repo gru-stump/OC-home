@@ -30,7 +30,7 @@
     label: '라벨', imageTint: '대표색 입히기', tintStrength: '색 진하기(0~1)', idNotice: '학생증 뒷면 안내',
     idIssued: '발급일', idValid: '유효기간', ticketTerms: '티켓 약관', tabs: '탭 이름', galleryEmpty: '갤러리 비었을 때 글',
     relationEmpty: '관계 비었을 때 글', panelStrength: '상세 배경 진하기(0~1)', sdShow: 'SD 보이는 때',
-    sdSize: 'SD 크기', wantedPaper: '수배지 종이 이미지',
+    sdSize: 'SD 크기', sdPos: 'SD 위치', sdX: 'SD 가로 미세조정', sdY: 'SD 세로 미세조정', wantedPaper: '수배지 종이 이미지',
     color: '대표색', subColor: '보조색', textColor: '글자색', cardTitle: '카드 큰 글자', cardSub: '카드 작은 글자',
     sd: 'SD 이미지', tile: '타일 이미지', tilePosition: '타일 사진 위치', name: '이름', nameEn: '영문 이름 / 직책',
     intro: '한 줄 소개', tags: '태그', seat: '좌석', gate: '입구', row: '열', number: '카드 번호',
@@ -74,6 +74,9 @@
     'characters.customRatio': [['', '자동 (이미지 비율 그대로)'], ['1 / 1', '1:1 정사각형'], ['2 / 3', '2:3 세로'], ['3 / 4', '3:4 세로'], ['4 / 5', '4:5 세로'], ['9 / 16', '9:16 세로로 길게'], ['3 / 2', '3:2 가로'], ['4 / 3', '4:3 가로'], ['16 / 9', '16:9 가로로 길게']],
     'owner.customRatio': [['', '자동 (이미지 비율 그대로)'], ['1 / 1', '1:1 정사각형'], ['2 / 3', '2:3 세로'], ['3 / 4', '3:4 세로'], ['4 / 5', '4:5 세로'], ['9 / 16', '9:16 세로로 길게'], ['3 / 2', '3:2 가로'], ['4 / 3', '4:3 가로'], ['16 / 9', '16:9 가로로 길게']],
     'title.type': [['text', '글자'], ['image', '로고 이미지']],
+    'characterPage.sdPos': [['rb', '오른쪽 아래 (기본)'], ['lb', '왼쪽 아래'], ['rt', '오른쪽 위'], ['lt', '왼쪽 위']],
+    'characters.sdPos': [['', '캐릭터 페이지 설정 따름']].concat([['rb', '오른쪽 아래'], ['lb', '왼쪽 아래'], ['rt', '오른쪽 위'], ['lt', '왼쪽 위']]),
+    'owner.sdPos': [['', '캐릭터 페이지 설정 따름']].concat([['rb', '오른쪽 아래'], ['lb', '왼쪽 아래'], ['rt', '오른쪽 위'], ['lt', '왼쪽 위']]),
     'characterPage.sdShow': [['back', '카드를 뒤집었을 때만'], ['always', '항상']],
     'guest.mode': [['firebase', 'Firebase (비밀글 / 답글 / 삭제)'], ['form', '구글 폼 + 시트'], ['widget', '외부 위젯'], ['links', '익명 질문 링크만']]
   };
@@ -338,14 +341,26 @@
       rs.onchange = function () { set(Number(rs.value)); touch(); };
       return rs;
     }
-    if (key === 'customSize') {
-      /* 카드 크기 : 막대로 30 ~ 100% */
-      var sv = Math.max(30, Math.min(100, Number(val) || 100));
-      var rg = h('input', { type: 'range', min: '30', max: '100', step: '5', style: 'flex:1;max-width:260px' }); rg.value = sv;
-      var out = h('b', { style: 'min-width:46px;font-size:13px', text: sv + '%' });
-      rg.oninput = function () { out.textContent = rg.value + '%'; set(Number(rg.value)); touch(); };
-      return h('div', { class: 'oha-img', style: 'align-items:center' },
-        [rg, out, h('small', { style: 'color:#888', text: '100% = 화면에 들어가는 최대 크기' })]);
+    if (RANGES[key] && (typeof val === 'number' || val === '' || /^-?\d+(\.\d+)?$/.test(String(val)))) {
+      /* 막대로 조절하는 칸 (카드 크기 · SD 크기 · SD 미세조정) */
+      var R = RANGES[key];
+      var page = (pkey === 'characters' || pkey === 'owner') && R.page ? ((st.draft && st.draft.characterPage) || {})[key] : undefined;
+      var follow = val === '' && page !== undefined;           /* 비어 있으면 캐릭터 페이지 설정을 따라요 */
+      var cur = follow ? Number(page) || R.def : (val === '' ? R.def : Number(val));
+      var rg = h('input', { type: 'range', min: String(R.min), max: String(R.max), step: String(R.step), style: 'flex:1;max-width:240px' }); rg.value = cur;
+      var out = h('b', { style: 'min-width:58px;font-size:13px' });
+      var note = h('small', { style: 'color:#888' });
+      function paint(v, f) { out.textContent = v + R.unit; note.textContent = f ? '캐릭터 페이지 설정 따름' : (R.hint || ''); }
+      paint(cur, follow);
+      rg.oninput = function () { paint(rg.value, false); set(Number(rg.value)); touch(); };
+      var kids = [rg, out];
+      if (page !== undefined) {
+        var back = h('button', { class: 'oha-mini', type: 'button', text: '기본으로' });
+        back.onclick = function () { set(''); touch(); rg.value = Number(page) || R.def; paint(rg.value, true); };
+        kids.push(back);
+      }
+      kids.push(note);
+      return h('div', { class: 'oha-img', style: 'align-items:center;flex-wrap:wrap' }, kids);
     }
     if (typeof val === 'number') {
       var n = h('input', { class: 'oha-in', type: 'number', step: 'any' }); n.value = val;
@@ -544,6 +559,30 @@
     return { el: el, refresh: refresh };
   }
 
+  /* 막대로 조절하는 칸 : 최소 · 최대 · 간격 · 단위 · 기본값 (page: 캐릭터 페이지 설정을 따를 수 있음) */
+  var RANGES = {
+    customSize: { min: 30, max: 100, step: 5, unit: '%', def: 100, hint: '100% = 화면에 들어가는 최대 크기' },
+    sdSize: { min: 60, max: 400, step: 10, unit: 'px', def: 230, page: true, hint: 'SD 가로 크기' },
+    sdX: { min: -200, max: 200, step: 5, unit: 'px', def: 0, page: true, hint: '− 왼쪽 · + 오른쪽' },
+    sdY: { min: -200, max: 200, step: 5, unit: 'px', def: 0, page: true, hint: '− 위 · + 아래' }
+  };
+
+  /* SD 칸 (크기 · 위치 · 미세조정)을 SD 이미지 바로 아래에 꺼내 둬요 */
+  function ensureAfter(obj, anchor, fields) {
+    var keys = Object.keys(obj), vals = {};
+    keys.forEach(function (k) { vals[k] = obj[k]; });
+    Object.keys(fields).forEach(function (k) { if (!(k in vals)) vals[k] = fields[k]; });
+    var order = [];
+    keys.forEach(function (k) {
+      if (k in fields) return;
+      order.push(k);
+      if (k === anchor) Object.keys(fields).forEach(function (c) { order.push(c); });
+    });
+    Object.keys(fields).forEach(function (c) { if (order.indexOf(c) < 0) order.push(c); });
+    keys.forEach(function (k) { delete obj[k]; });
+    order.forEach(function (k) { obj[k] = vals[k]; });
+  }
+
   /* 종류가 '직접 만든 카드 · 캐릭터 이미지'면 앞면 · 뒷면 · 비율 · 둥글기 칸을 '종류' 바로 아래에 꺼내 둬요 */
   var CUSTOM_FIELDS = { customFront: '', customBack: '', customRatio: '', customSize: 100, customRadius: 12 };
   function ensureCustom(obj) {
@@ -567,6 +606,9 @@
       box.innerHTML = '';
       var cardObj = (key === 'characters' || key === 'owner') && 'type' in obj;
       if (cardObj && obj.type === 'custom') ensureCustom(obj);
+      if ((key === 'characters' || key === 'owner') && 'sd' in obj) ensureAfter(obj, 'sd', { sdSize: '', sdPos: '', sdX: '', sdY: '' });
+      if (key === 'characterPage' && 'sdShow' in obj) ensureAfter(obj, 'sdSize' in obj ? 'sdSize' : 'sdShow',
+        'sdSize' in obj ? { sdPos: 'rb', sdX: 0, sdY: 0 } : { sdSize: 230, sdPos: 'rb', sdX: 0, sdY: 0 });
       /* 갤러리 항목이면 '보이는 위치' 맞추기 상자를 붙여요 */
       var picker = (key === 'gallery' && 'image' in obj) ? posPicker(obj) : null;
       Object.keys(obj).forEach(function (k) {

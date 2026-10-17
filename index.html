@@ -894,7 +894,7 @@
               '<div class="cd-face cd-front">' + front + '</div>' +
               '<div class="cd-face cd-back">' + backFace + '</div>' +
             '</div>' +
-            (ch.sd ? '<img class="cd-sd" src="' + ch.sd + '" alt="" style="--sd-w:' + sdW(ch) + '">' : "") +
+            (ch.sd ? '<img class="cd-sd' + OC_SD.cls(ch, S.characterPage) + '" src="' + ch.sd + '" alt="" style="--sd-w:' + sdW(ch) + OC_SD.vars(ch, S.characterPage) + '">' : "") +
           '</div>';
         holder.setAttribute("data-type", type);
 
@@ -1807,7 +1807,7 @@
             '<div class="cd-face cd-front">' + faceF + '</div>' +
             '<div class="cd-face cd-back">' + faceB + '</div>' +
           '</div>' +
-          (O.sd ? '<img class="cd-sd" src="' + O.sd + '" alt="" style="--sd-w:' + sdW(O) + '">' : "") +
+          (O.sd ? '<img class="cd-sd' + OC_SD.cls(O, S.characterPage) + '" src="' + O.sd + '" alt="" style="--sd-w:' + sdW(O) + OC_SD.vars(O, S.characterPage) + '">' : "") +
         '</div>';
       if (type === "custom") sizeCustom(O);
       document.getElementById("cdFlip").addEventListener("click", function (e) {

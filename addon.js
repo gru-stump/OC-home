@@ -47,3 +47,28 @@ window.OC_CARD = {
     return isFinite(n) && n > 0 ? Math.max(30, Math.min(100, n)) / 100 : 1;
   }
 };
+
+/* ---------- SD 이미지 위치 · 크기 ----------
+   · sdPos : 위치  rb 오른쪽 아래(기본) / lb 왼쪽 아래 / rt 오른쪽 위 / lt 왼쪽 위
+   · sdX   : 가로 미세조정 (px, + 오른쪽 / − 왼쪽)
+   · sdY   : 세로 미세조정 (px, + 아래 / − 위)
+   캐릭터(또는 오너)에 적은 값 → 없으면 캐릭터 페이지 설정 값 → 없으면 기본
+   ----------------------------------------- */
+window.OC_SD = (function () {
+  function pick(o, P, k) {
+    var v = o && o[k];
+    if (v === "" || v == null) v = P && P[k];
+    return v;
+  }
+  function num(v) { v = parseFloat(v); return isFinite(v) ? Math.max(-400, Math.min(400, v)) : 0; }
+  return {
+    cls: function (o, P) {
+      var p = pick(o, P, "sdPos");
+      return /^(lb|rt|lt)$/.test(p || "") ? " sd-" + p : "";
+    },
+    vars: function (o, P) {
+      var x = pick(o, P, "sdX"), y = pick(o, P, "sdY");
+      return ";--sd-x:" + num(x) + "px;--sd-y:" + num(y) + "px";
+    }
+  };
+})();
