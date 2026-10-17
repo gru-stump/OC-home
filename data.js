@@ -14,6 +14,7 @@
    │   [5] 캐릭터 페이지 설정   [11] 색상                             │
    │   [6] 캐릭터 목록          [12] 배경   [13] 글꼴                 │
    │                            [14] 스토리 페이지                    │
+   │                            [15] 갤러리 페이지                    │
    └───────────────────────────────────────────────────────────────┘
 
    ─────────────────────────────────────────────────────────────────
@@ -142,7 +143,7 @@ const SITE = {
      title : 메뉴 이름 (큰 영어 글씨)
      desc  : 메뉴 이름 아래 작은 설명 (비워도 됨)
      link  : 누르면 이동할 페이지
-             홈페이지 안 페이지 → "#character", "#pair", "#owner", "#guest", "#story"
+             홈페이지 안 페이지 → "#character", "#pair", "#owner", "#guest", "#story", "#gallery"
              다른 사이트 → "https://..."
      icon  : 오른쪽 동그란 아이콘 자리 이미지 주소
              비워두면 기본 아이콘이 나와요.
@@ -1235,6 +1236,94 @@ const SITE = {
 그러던 어느 날, 천령의 한계를 시험하려던 고위층은 위험해진 현장에서 지원을 끊고 철수 명령을 내렸다. 모두가 떠난 자리에 무영은 끝까지 남았고, 천령을 지키다 크게 다쳐 침식에 깊이 잠식되었다.
 천령은 처음으로 무영의 목덜미를 물어 직접 해독을 넣었다. 그날 이후 천령은 더 이상 여유로운 척하지 못했다. 놓아주는 법밖에 몰랐던 이무기가, 처음으로 붙잡기 시작했다.`,
       gallery: []
+    }
+  ],
+
+  /* =============================================
+     [15] 갤러리 페이지 (#gallery)  ─ gallery.js · gallery.css
+     ---------------------------------------------
+     그림을 썸네일로 나열하고 AU 버튼으로 걸러 봐요.
+     누르면 전체 이미지와 정보가 나오는 상세 화면이 열려요.
+
+     ▸ galleryPage (페이지 설정)
+       menu        : true → 메인 메뉴에 Gallery 자동으로 붙이기
+       menuTitle / menuDesc / menuIcon : 메인 메뉴 이름 · 설명 · 아이콘
+       label / heading / subText : 왼쪽 위 라벨 · 큰 제목 · 아래 작은 글
+       thumbRatio  : 썸네일 모양  "3 / 4" 세로 · "1 / 1" 정사각형 · "auto" 원본 비율(벽돌 쌓기)
+       allText     : AU 버튼 중 '전체' 버튼 글자
+       pickTitle   : 대표작 묶음 제목
+       hideText / revealText : 가린 그림 위 글자 / '눌러서 보기' 글자
+       storyButton : 상세 화면의 이야기 연결 버튼 글자
+       authorLabel / dateLabel / charLabel : 상세 화면 항목 이름
+       protect     : true → 오른쪽 클릭 · 끌어서 저장 막기 (완벽하게 막을 수는 없어요)
+       viewerColor : 상세 화면 바탕색 (비우면 대표 색에서 자동)
+       pointColor  : AU · 버튼 강조색 (비우면 자동)
+
+     ▸ artworks (그림 목록 · 위에서부터 순서대로)
+       title   : 제목
+       image   : 대표 이미지 (썸네일 · 상세 첫 장). 썸네일에 보일 부분은 편집기에서 맞춰요.
+       more    : 여러 장 묶음 [{ image: "주소", caption: "설명" }, …]
+       author  : 작가
+       date    : 날짜
+       au      : AU (예: "본편", "마피아 AU") → 같은 글자끼리 버튼으로 묶여요
+       chars   : 등장 캐릭터
+       comment : 짧은 코멘트 (상세 화면에만)
+       story   : 연결할 이야기 제목 (스토리 목록의 title 과 똑같이)
+       pin     : true → 맨 위 대표작으로 크게
+       hide    : true → 썸네일을 흐리게 가리고 눌러야 보여요
+       hideText: 가린 그림 위에 쓸 글 (비우면 hideText 기본값)
+  */
+  galleryPage: {
+    menu: true,               // 메인 메뉴에 Gallery 자동으로 붙이기 (편집기를 열면 메인 메뉴 목록으로 옮겨지고 false 가 돼요)
+    menuTitle: "Gallery",
+    menuDesc: "그림 모음",
+    menuIcon: "",
+    label: "GALLERY",
+    heading: "GALLERY",
+    subText: "천령 × 무영",
+    emptyText: "아직 등록된 그림이 없어요.",
+    thumbRatio: "3 / 4",
+    allText: "ALL",
+    pickTitle: "PICK",
+    hideText: "가려진 그림",
+    revealText: "눌러서 보기",
+    storyButton: "이야기 보기",
+    authorLabel: "작가",
+    dateLabel: "날짜",
+    charLabel: "캐릭터",
+    protect: true,
+    viewerColor: "",
+    pointColor: ""
+  },
+
+  artworks: [
+    {
+      title: "천령 전신",
+      image: "",
+      more: [],
+      author: "불가사리",
+      date: "",
+      au: "본편",
+      chars: "천령",
+      comment: "",
+      story: "",
+      pin: false,
+      hide: false,
+      hideText: ""
+    },
+    {
+      title: "무영 전신",
+      image: "",
+      more: [],
+      author: "불가사리",
+      date: "",
+      au: "본편",
+      chars: "무영",
+      comment: "",
+      story: "",
+      pin: false,
+      hide: false,
+      hideText: ""
     }
   ]
 };

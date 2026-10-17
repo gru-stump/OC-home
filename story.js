@@ -116,6 +116,13 @@ window.OC_STORY = (function () {
     wrap.querySelectorAll(".st-card").forEach(function (b) {
       b.addEventListener("click", function () { open(+b.getAttribute("data-n")); });
     });
+    /* 다른 페이지(갤러리)에서 '이야기 보기'로 넘어왔으면 그 이야기를 바로 펼쳐요 */
+    if (window.OC_STORY_OPEN) {
+      const want = String(window.OC_STORY_OPEN).trim();
+      window.OC_STORY_OPEN = "";
+      const at = list.findIndex(function (x) { return String(x.title || "").trim() === want; });
+      if (at > -1) setTimeout(function () { open(at); }, 50);
+    }
 
     /* =====================================================
        읽기 화면

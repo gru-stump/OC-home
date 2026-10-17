@@ -14,12 +14,12 @@
   var BASE = 'https://www.gstatic.com/firebasejs/' + VER + '/';
   var SKIP = { firebase: 1, admin: 1, firebaseSdk: 1 };      /* 편집기에서 건드리지 않는 항목 */
   var ORDER = ['themeColor', 'pageTitle', 'title', 'menus', 'deco', 'characterPage', 'characters',
-               'pairPage', 'pairs', 'storyPage', 'stories', 'owner', 'guest', 'colors', 'background', 'fonts'];
+               'pairPage', 'pairs', 'storyPage', 'stories', 'galleryPage', 'artworks', 'owner', 'guest', 'colors', 'background', 'fonts'];
   var TAB_NAME = {
     themeColor: '대표 색', pageTitle: '사이트 이름', title: '메인 타이틀', menus: '메인 메뉴', deco: '메인 꾸밈 글자',
     characterPage: '캐릭터 페이지 설정', characters: '캐릭터 목록', pairPage: '페어 페이지 설정', pairs: '페어 목록',
     owner: '오너 페이지', guest: '방명록 안내', colors: '색상', background: '배경', fonts: '글꼴',
-    storyPage: '스토리 페이지 설정', stories: '스토리 목록'
+    storyPage: '스토리 페이지 설정', stories: '스토리 목록', galleryPage: '갤러리 페이지 설정', artworks: '갤러리 그림 목록'
   };
   var LABEL = {
     themeColor: '대표 색 (이 색 하나로 사이트 전체 색이 바뀌어요)', pageTitle: '브라우저 탭 이름',
@@ -64,24 +64,36 @@
     /* 스토리 페이지 (story.js) */
     summary: '한줄요약', pov: '시점 · 작은 머리말', readMore: '카드 안내 글자', bodyEmpty: '본문이 비었을 때 글',
     galleryTitle: '이미지 모음 제목', prevText: '이전 버튼 글자', nextText: '다음 버튼 글자',
-    cardColor: '카드 바탕색', readerColor: '읽기 화면 바탕색', pointColor: '날짜 · 점 색', lineColor: '시간선 색'
+    cardColor: '카드 바탕색', readerColor: '읽기 화면 바탕색', pointColor: '날짜 · 점 색', lineColor: '시간선 색',
+    /* 갤러리 페이지 (gallery.js) */
+    more: '여러 장 묶음 (더 넣을 이미지)', author: '작가', au: 'AU', chars: '등장 캐릭터', comment: '짧은 코멘트',
+    pin: '대표작으로 맨 위에 크게', hide: '가리기 (눌러야 보여요)', thumbRatio: '썸네일 모양', allText: '전체 버튼 글자',
+    pickTitle: '대표작 제목', revealText: '눌러서 보기 글자', storyButton: '이야기 연결 버튼 글자',
+    authorLabel: '작가 항목 이름', dateLabel: '날짜 항목 이름', charLabel: '캐릭터 항목 이름',
+    protect: '저장 방지 (오른쪽 클릭 · 끌기 막기)', viewerColor: '상세 화면 바탕색'
   };
   /* 같은 칸 이름이라도 놓인 곳에 따라 다르게 부르는 이름 : '부모.칸' */
   var LABEL_IN = {
     'stories.date': '시간 (예: 약 20년 전)', 'stories.title': '제목', 'stories.image': '대표 이미지',
     'stories.body': '본문 (줄마다 한 문단 · ― 한 줄은 장면 전환)', 'stories.gallery': '이미지 모음',
     'storyPage.label': '왼쪽 위 라벨', 'storyPage.heading': '큰 제목', 'storyPage.subText': '큰 제목 아래 글',
-    'storyPage.emptyText': '이야기가 없을 때 글', 'storyPage.menu': '메인 메뉴에 자동으로 붙이기 (편집기 메인 메뉴로 옮긴 뒤엔 꺼져요)',
+    'storyPage.emptyText': '이야기가 없을 때 글',
+    'artworks.title': '제목', 'artworks.image': '대표 이미지 (썸네일)', 'artworks.date': '날짜',
+    'artworks.story': '연결할 이야기', 'artworks.hideText': '가린 그림 위 글 (비우면 기본)',
+    'galleryPage.label': '왼쪽 위 라벨', 'galleryPage.heading': '큰 제목', 'galleryPage.subText': '큰 제목 아래 글',
+    'galleryPage.emptyText': '그림이 없을 때 글', 'galleryPage.hideText': '가린 그림 위 기본 글',
+    'galleryPage.pointColor': 'AU · 버튼 강조색', 'galleryPage.menu': '메인 메뉴에 자동으로 붙이기 (편집기 메인 메뉴로 옮긴 뒤엔 꺼져요)',
+    'galleryPage.menuTitle': '메인 메뉴 이름', 'galleryPage.menuDesc': '메인 메뉴 설명', 'galleryPage.menuIcon': '메인 메뉴 아이콘', 'storyPage.menu': '메인 메뉴에 자동으로 붙이기 (편집기 메인 메뉴로 옮긴 뒤엔 꺼져요)',
     'storyPage.menuTitle': '메인 메뉴 이름', 'storyPage.menuDesc': '메인 메뉴 설명', 'storyPage.menuIcon': '메인 메뉴 아이콘'
   };
   function labelOf(k, key) { return LABEL_IN[key + '.' + k] || LABEL[k] || k; }
-  var LONG_KEYS = { text: 1, desc: 1, intro: 1, about: 1, story: 1, review: 1, idNotice: 1, backNotice: 1, code: 1, message: 1, note: 1 };
+  var LONG_KEYS = { text: 1, desc: 1, intro: 1, about: 1, story: 1, review: 1, idNotice: 1, backNotice: 1, code: 1, message: 1, note: 1, comment: 1 };
   /* 이미지 칸 : [올리기] 버튼이 붙어요 */
   var IMAGE_KEYS = { image: 1, sd: 1, tile: 1, icon: 1, customFront: 1, customBack: 1, pairImage: 1, titleImage: 1,
                      wantedPaper: 1, ownerImage: 1, menuIcon: 1 };
   /* 색 칸 : 색 선택기가 붙어요 */
   var COLOR_KEYS = { themeColor: 1, color: 1, subColor: 1, textColor: 1, overlayColor: 1, fadeColor: 1, gridColor: 1,
-                     cardColor: 1, readerColor: 1, pointColor: 1, lineColor: 1 };
+                     cardColor: 1, readerColor: 1, pointColor: 1, lineColor: 1, viewerColor: 1 };
   /* 고르는 칸 : 부모 이름.칸 이름 → 선택지 */
   var SELECTS = {
     'characters.type': [['id', '학생증 / 사원증'], ['ticket', '공연 티켓'], ['wanted', '수배지'], ['custom', '직접 만든 카드 · 캐릭터 이미지']],
@@ -93,6 +105,8 @@
     'characters.sdPos': [['', '캐릭터 페이지 설정 따름']].concat([['rb', '오른쪽 아래'], ['lb', '왼쪽 아래'], ['rt', '오른쪽 위'], ['lt', '왼쪽 위']]),
     'owner.sdPos': [['', '캐릭터 페이지 설정 따름']].concat([['rb', '오른쪽 아래'], ['lb', '왼쪽 아래'], ['rt', '오른쪽 위'], ['lt', '왼쪽 위']]),
     'characterPage.sdShow': [['back', '카드를 뒤집었을 때만'], ['always', '항상']],
+    'galleryPage.thumbRatio': [['3 / 4', '세로 3:4 (전신 그림에 좋아요)'], ['1 / 1', '정사각형'], ['4 / 5', '세로 4:5'], ['auto', '원본 비율 그대로 (벽돌 쌓기)']],
+    'artworks.chars': [['', '(비워두기)'], ['천령', '천령'], ['무영', '무영'], ['천령 · 무영', '천령 · 무영']],
     'guest.mode': [['firebase', 'Firebase (비밀글 / 답글 / 삭제)'], ['form', '구글 폼 + 시트'], ['widget', '외부 위젯'], ['links', '익명 질문 링크만']]
   };
 
@@ -102,7 +116,8 @@
   /* 편집 탭 → 미리보기에서 보여줄 화면 */
   var TAB_ROUTE = { themeColor: '', pageTitle: '', title: '', menus: '', deco: '', colors: '', background: '', fonts: '',
                     characterPage: 'character', characters: 'character', pairPage: 'pair', pairs: 'pair',
-                    owner: 'owner', guest: 'guest', storyPage: 'story', stories: 'story', __gb: 'guest' };
+                    owner: 'owner', guest: 'guest', storyPage: 'story', stories: 'story',
+                    galleryPage: 'gallery', artworks: 'gallery', __gb: 'guest' };
 
   function $(sel, el) { return (el || document).querySelector(sel); }
   function h(tag, attrs, kids) {
@@ -171,7 +186,7 @@
   function previewPane() {
     var base = location.href.split('#')[0].split('?')[0];
     var pane = h('div', { class: 'oha-pv' });
-    var routes = [['', '메인'], ['character', 'Character'], ['pair', 'Pair'], ['owner', 'Owner'], ['guest', 'Guest'], ['story', 'Story']];
+    var routes = [['', '메인'], ['character', 'Character'], ['pair', 'Pair'], ['owner', 'Owner'], ['guest', 'Guest'], ['story', 'Story'], ['gallery', 'Gallery']];
     var sel = h('select', { id: 'oha-route', class: 'oha-in', style: 'width:auto;flex:1;min-width:0' },
       routes.map(function (r) { return h('option', { value: r[0], text: r[1] }); }));
     sel.value = st.pvRoute;
@@ -311,6 +326,24 @@
       wrap.appendChild(h('div', { class: 'oha-img' }, [pick, txt, clr]));
       return wrap;
     }
+    /* 갤러리 그림 → 연결할 이야기 : 스토리 목록에서 고르기 */
+    if (pkey === 'artworks' && key === 'story') {
+      var ts = ((st.draft && st.draft.stories) || []).map(function (x) { return x.title || ''; }).filter(Boolean);
+      var ss = h('select', { class: 'oha-in' }, [h('option', { value: '', text: '연결 안 함' })].concat(ts.map(function (t) { return h('option', { value: t, text: t }); })));
+      if (val && ts.indexOf(val) < 0) ss.appendChild(h('option', { value: val, text: val + ' (스토리 목록에 없음)' }));
+      ss.value = val;
+      ss.onchange = function () { set(ss.value); touch(); };
+      return ss;
+    }
+    /* 갤러리 그림 → AU : 이미 쓴 AU 를 골라 쓸 수 있게 (새로 적어도 돼요) */
+    if (pkey === 'artworks' && key === 'au') {
+      var base = ['본편', '캠퍼스 AU', '마피아 AU', '뱀파이어 AU', '포켓몬 AU'];
+      ((st.draft && st.draft.artworks) || []).forEach(function (x) { if (x.au && base.indexOf(x.au) < 0) base.push(x.au); });
+      var dl = h('datalist', { id: 'oha-au-list' }, base.map(function (a) { return h('option', { value: a }); }));
+      var ai = h('input', { class: 'oha-in', type: 'text', list: 'oha-au-list', placeholder: '고르거나 새로 적기 (같은 글자끼리 묶여요)' }); ai.value = val;
+      ai.oninput = function () { set(ai.value); touch(); };
+      return h('div', null, [ai, dl]);
+    }
     var isImg = !!(IMAGE_KEYS[key] || IMAGE_KEYS[pkey]);
     var long = LONG_KEYS[key] || (key === 'body' && pkey === 'stories') || String(val).indexOf('\n') >= 0;
     var inp = long ? h('textarea', { class: 'oha-ta' }) : h('input', { class: 'oha-in', type: 'text' });
@@ -416,7 +449,9 @@
     timeline: { date: '', title: '', text: '', image: '' },
     trpg: { title: '', system: 'CoC 7th', date: '', role: '', text: '', file: '', link: '' },
     sides: { catchphrase: '', desc: '', image: '' }, mine: { image: '', size: '200 × 40' }, friends: { name: '', image: '', url: '' },
-    stories: { date: '', title: '', summary: '', pov: '', image: '', body: '', gallery: [] }
+    stories: { date: '', title: '', summary: '', pov: '', image: '', body: '', gallery: [] },
+    artworks: { title: '', image: '', more: [], author: '', date: '', au: '', chars: '', comment: '', story: '', pin: false, hide: false, hideText: '' },
+    more: { image: '', caption: '' }
   };
 
   function templatesFor(key, pkey) {
@@ -437,6 +472,7 @@
       { name: '오너 메뉴', desc: '#owner', value: { num: '', title: 'Owner', desc: '오너 소개', link: '#owner', icon: '', newTab: false } },
       { name: '방명록 메뉴', desc: '#guest', value: { num: '', title: 'Guest', desc: '방명록', link: '#guest', icon: '', newTab: false } },
       { name: '타임라인(스토리) 메뉴', desc: '#story', value: storyMenuItem() },
+      { name: '갤러리 메뉴', desc: '#gallery', value: pageMenuItem('gallery') },
       { name: '다른 사이트 링크', desc: '새 탭으로 열려요', value: { num: '', title: '', desc: '', link: 'https://', icon: '', newTab: true } }
     ];
     if (key === 'members') return [{ name: '캐릭터 선택', desc: '', value: 1 }];
@@ -450,17 +486,25 @@
   /* 스토리(타임라인) 메뉴 : 사이트에서 자동으로 붙던 Timeline 메뉴를
      편집기의 '메인 메뉴' 목록에 진짜 항목으로 한 번 넣어 줘요. (순서 바꾸기 · 지우기 가능)
      넣은 뒤에는 storyPage.menu 를 false 로 바꿔서, 지워도 다시 생기지 않게 해요. */
-  function storyMenuItem() {
-    var P = st.draft.storyPage || {};
-    return { num: '', title: P.menuTitle || 'Timeline', desc: P.menuDesc || '', link: '#story', icon: P.menuIcon || '', newTab: false };
+  var AUTO_MENUS = [['story', 'storyPage', 'Timeline'], ['gallery', 'galleryPage', 'Gallery']];
+  function pageMenuItem(route) {
+    var a = AUTO_MENUS.filter(function (x) { return x[0] === route; })[0];
+    var P = (st.draft && st.draft[a[1]]) || {};
+    return { num: '', title: P.menuTitle || a[2], desc: P.menuDesc || '', link: '#' + route, icon: P.menuIcon || '', newTab: false };
   }
+  function storyMenuItem() { return pageMenuItem('story'); }
+  /* 넣은 메뉴 이름들을 돌려줘요 (없으면 빈 목록) */
   function addStoryMenu() {
-    var P = st.draft.storyPage, M = st.draft.menus;
-    if (!P || P.menu === false || !Array.isArray(M)) return false;
-    var has = M.some(function (m) { return /^#\/?story\b/.test(String(m && m.link || '')); });
-    if (!has) M.push(storyMenuItem());
-    P.menu = false;
-    return !has;
+    var M = st.draft.menus, added = [];
+    if (!Array.isArray(M)) return added;
+    AUTO_MENUS.forEach(function (a) {
+      var P = st.draft[a[1]];
+      if (!P || P.menu === false) return;
+      var re = new RegExp('^#\\/?' + a[0] + '\\b');
+      if (!M.some(function (m) { return re.test(String(m && m.link || '')); })) { var it = pageMenuItem(a[0]); M.push(it); added.push(it.title); }
+      P.menu = false;
+    });
+    return added;
   }
 
   /* 캐릭터 순서를 바꾸거나 지울 때, 번호로 연결된 곳(페어 멤버 · 리뷰 · 관계 링크)을 같이 고쳐요 */
@@ -503,9 +547,16 @@
     return m ? [Math.min(100, +m[1]), Math.min(100, +m[2])] : [50, 50];
   }
   function parseZoom(z) { z = parseFloat(z); return isFinite(z) && z > 1 ? Math.min(5, z) : 1; }
+  /* 갤러리 썸네일 비율 (가로 ÷ 세로). 원본 비율이면 자를 필요가 없어서 0 */
+  function thumbRatio() {
+    var r = String(((st.draft && st.draft.galleryPage) || {}).thumbRatio || '3 / 4');
+    var m = /^(\d+(?:\.\d+)?) \/ (\d+(?:\.\d+)?)$/.exec(r);
+    return m ? +m[1] / +m[2] : 0;
+  }
   function posPicker(obj, ratio) {
     var xy = parsePos(obj.pos), zm = parseZoom(obj.zoom);
-    var fw = ratio ? 261 : 180, fh = ratio ? Math.round(261 / ratio) : 180;   /* ratio : 가로 ÷ 세로 (비우면 정사각형) */
+    /* ratio : 가로 ÷ 세로 (비우면 정사각형) */
+    var fw = !ratio ? 180 : ratio >= 1 ? 261 : Math.round(230 * ratio), fh = !ratio ? 180 : ratio >= 1 ? Math.round(261 / ratio) : 230;
     var img = h('img', { alt: '', draggable: 'false',
       style: 'width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;user-select:none' });
     var frame = h('div', { title: '끌어서 보일 부분을 맞춰요',
@@ -646,7 +697,8 @@
         'sdSize' in obj ? { sdPos: 'rb', sdX: 0, sdY: 0 } : { sdSize: 230, sdPos: 'rb', sdX: 0, sdY: 0 });
       /* 갤러리 항목이면 '보이는 위치' 맞추기 상자를 붙여요 */
       var picker = (key === 'gallery' && 'image' in obj) ? posPicker(obj)
-                 : (key === 'stories' && 'image' in obj) ? posPicker(obj, 2.9) : null;   /* 스토리 카드는 가로로 긴 틀 */
+                 : (key === 'stories' && 'image' in obj) ? posPicker(obj, 2.9)    /* 스토리 카드는 가로로 긴 틀 */
+                 : (key === 'artworks' && 'image' in obj && thumbRatio()) ? posPicker(obj, thumbRatio()) : null;   /* 갤러리 썸네일 모양 그대로 */
       Object.keys(obj).forEach(function (k) {
         if (picker && (k === 'pos' || k === 'zoom')) return;   /* 자르기 값은 상자로 맞추니 글자 칸은 숨겨요 */
         var v = obj[k];
@@ -905,7 +957,8 @@
       if (!st.draft) {
         st.draft = clone(S);
         Object.keys(SKIP).forEach(function (k) { delete st.draft[k]; });
-        if (addStoryMenu()) setTimeout(function () { touch(); toast('메인 메뉴에 Timeline 메뉴를 넣었어요. 저장을 눌러 주세요.'); }, 0);
+        var added = addStoryMenu();
+        if (added.length) setTimeout(function () { touch(); toast('메인 메뉴에 ' + added.join(', ') + ' 메뉴를 넣었어요. 저장을 눌러 주세요.'); }, 0);
       }
       if (st.preview) {
         var ed = h('div', { class: 'oha-ed' });

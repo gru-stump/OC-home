@@ -9,6 +9,8 @@
   <link rel="stylesheet" href="addon.css">
   <!-- 스토리 페이지(#story) 디자인 -->
   <link rel="stylesheet" href="story.css">
+  <!-- 갤러리 페이지(#gallery) 디자인 -->
+  <link rel="stylesheet" href="gallery.css">
   <!-- 휴대폰 화면용 (폭 768px 이하에서만 적용, PC 화면엔 영향 없음) -->
   <link rel="stylesheet" href="mobile.css">
   <!-- 내용 데이터 (수정은 data.js 에서) -->
@@ -17,6 +19,8 @@
   <script src="addon.js"></script>
   <!-- 스토리 페이지(#story) -->
   <script src="story.js"></script>
+  <!-- 갤러리 페이지(#gallery) -->
+  <script src="gallery.js"></script>
   <script src="site.config.js"></script>
 
   <!-- 연결 설정(site.config.js) 적용 + 편집기에서 저장한 설정(Firestore site/config) 불러오기 -->
@@ -91,7 +95,7 @@
        - 페이지는 주소 뒤 # 으로 나뉘어요.
          메인 : index.html   캐릭터 : index.html#character
          페어 : index.html#pair   오너 : index.html#owner   방명록 : index.html#guest
-         스토리 : index.html#story
+         스토리 : index.html#story   갤러리 : index.html#gallery
        - 내용 수정은 data.js 에서 해주세요.
        ========================================================= -->
 
@@ -292,6 +296,26 @@
   </div>
   </template>
 
+  <!-- ===== 페이지: gallery (gallery.js · gallery.css) ===== -->
+  <template id="tpl-gallery">
+  <main class="home gl-page">
+    <!-- 왼쪽 위: 뱃지 (누르면 메인홈으로) -->
+    <a class="deco-top-left" id="decoTopLeft" href="#"></a>
+
+    <!-- 오른쪽 위: 홈 버튼 + 개수 -->
+    <div class="deco-top-right ch-top-right">
+      <a class="ch-home" href="#"><span class="mini-chev"><i></i><i></i><i></i></span>HOME</a>
+      <span class="ch-count" id="glCount"></span>
+    </div>
+
+    <!-- AU 버튼 + 대표작 + 썸네일 -->
+    <div class="gl-wrap" id="glWrap"></div>
+  </main>
+
+  <!-- 누르면 열리는 상세 보기 -->
+  <div class="gl-view" id="glView"></div>
+  </template>
+
   <script>
     (function () {
       const S = (typeof SITE !== "undefined") ? SITE : {};
@@ -424,8 +448,8 @@
       /* =====================================================
          페이지 이동 (주소 뒤 #이름)
          ===================================================== */
-      const ROUTES = ["home", "character", "pair", "owner", "guest", "story"];
-      const TITLES = { home: "", character: "Character", pair: "Pair", owner: "Owner", guest: "Guest", story: "Story" };
+      const ROUTES = ["home", "character", "pair", "owner", "guest", "story", "gallery"];
+      const TITLES = { home: "", character: "Character", pair: "Pair", owner: "Owner", guest: "Guest", story: "Story", gallery: "Gallery" };
 
       // "character.html" 처럼 적힌 링크도 "#character" 로 바꿔줘요
       function routeLink(l) {
@@ -506,13 +530,16 @@
       const menus = (S.menus || []).slice();
       /* 스토리(타임라인) 메뉴 : 메인 메뉴에 #story 링크가 없으면 맨 아래에 자동으로 붙여요.
          끄려면 storyPage.menu 를 false 로 (편집기 '스토리 페이지 설정' → 메인 메뉴에 보이기) */
-      const SP = S.storyPage || {};
-      if (SP.menu !== false && !menus.some(function (m) { return /^#\/?story\b/.test(String(m && m.link || "")); })) {
-        menus.push({ title: SP.menuTitle || "Timeline", desc: SP.menuDesc || "", link: "#story", icon: SP.menuIcon || "", newTab: false });
-      }
+      [["story", S.storyPage, "Timeline"], ["gallery", S.galleryPage, "Gallery"]].forEach(function (a) {
+        const SP = a[1] || {};
+        if (!a[1] || SP.menu === false) return;
+        if (menus.some(function (m) { return new RegExp("^#\\/?" + a[0] + "\\b").test(String(m && m.link || "")); })) return;
+        menus.push({ title: SP.menuTitle || a[2], desc: SP.menuDesc || "", link: "#" + a[0], icon: SP.menuIcon || "", newTab: false });
+      });
       const menuArea = menuBox.closest(".menu-area");   /* 메뉴가 5개 이상이면 조금 촘촘하게 (addon.css) */
       menuArea.style.setProperty("--menu-n", menus.length);
       if (menus.length >= 5) menuArea.classList.add("is-many");
+      if (menus.length >= 6) menuArea.classList.add("is-more");
       menus.forEach(function (m, i) {
         const num = m.num || String(i + 1).padStart(2, "0");
         const icon = m.icon ? '<img src="' + m.icon + '" alt="">' : defaultIcon;
@@ -2225,11 +2252,18 @@
         if (window.OC_STORY) OC_STORY.mount({ S: S, addKey: addKey, mix: mix, THEME: THEME });
       };
 
+      /* ##################################################### */
+      /* ##### 페이지: gallery  (내용은 gallery.js) ##### */
+      /* ##################################################### */
+      PAGES.gallery = function () {
+        if (window.OC_GALLERY) OC_GALLERY.mount({ S: S, addKey: addKey, mix: mix, THEME: THEME });
+      };
+
       const app = document.getElementById("app");
       function show(route) {
         if (ROUTES.indexOf(route) < 0) route = "home";
         keyHandlers = [];
-        document.body.classList.remove("is-flipped", "no-tint", "sd-always", "ch-single", "st-reading");
+        document.body.classList.remove("is-flipped", "no-tint", "sd-always", "ch-single", "st-reading", "gl-viewing");
         document.body.setAttribute("data-page", route);
         app.innerHTML = document.getElementById("tpl-" + route).innerHTML;
         app.classList.remove("page-in");
@@ -2251,7 +2285,7 @@
       var v = view(); if (!v) return;
       if (window.OHAdmin) return window.OHAdmin.mount(v);
       var s = document.createElement('script');
-      s.src = 'admin.js?v=2';
+      s.src = 'admin.js?v=3';
       s.onload = function () { window.OHAdmin.mount(v); };
       document.body.appendChild(s);
     }
