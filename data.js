@@ -963,6 +963,8 @@ const SITE = {
      메인 메뉴에 link: "#story" 인 메뉴를 추가하면 들어갈 수 있어요.
 
      ▸ storyPage (페이지 설정)
+       menu        : true → 메인 메뉴에 자동으로 보여요 / false → 안 보여요
+       menuTitle / menuDesc / menuIcon : 메인 메뉴 이름 · 설명 · 아이콘
        label       : 왼쪽 위 라벨
        heading     : 큰 제목
        subText     : 큰 제목 아래 작은 글
@@ -988,6 +990,10 @@ const SITE = {
        gallery : 읽기 화면 아래 이미지 모음 [{ image: "주소", caption: "설명" }, …]
   */
   storyPage: {
+    menu: true,               // 메인 메뉴에 자동으로 보이기 (메인 메뉴에 #story 를 직접 넣었으면 그게 우선)
+    menuTitle: "Timeline",    // 메인 메뉴 이름
+    menuDesc: "천무의 기록",   // 메인 메뉴 아래 작은 설명
+    menuIcon: "",             // 메인 메뉴 오른쪽 아이콘 (비우면 기본 아이콘)
     label: "STORY",
     heading: "TIMELINE",
     subText: "천령 × 무영 · 그날 잡은 손의 기록",

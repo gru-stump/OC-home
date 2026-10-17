@@ -71,13 +71,14 @@
     'stories.date': '시간 (예: 약 20년 전)', 'stories.title': '제목', 'stories.image': '대표 이미지',
     'stories.body': '본문 (줄마다 한 문단 · ― 한 줄은 장면 전환)', 'stories.gallery': '이미지 모음',
     'storyPage.label': '왼쪽 위 라벨', 'storyPage.heading': '큰 제목', 'storyPage.subText': '큰 제목 아래 글',
-    'storyPage.emptyText': '이야기가 없을 때 글'
+    'storyPage.emptyText': '이야기가 없을 때 글', 'storyPage.menu': '메인 메뉴에 보이기',
+    'storyPage.menuTitle': '메인 메뉴 이름', 'storyPage.menuDesc': '메인 메뉴 설명', 'storyPage.menuIcon': '메인 메뉴 아이콘'
   };
   function labelOf(k, key) { return LABEL_IN[key + '.' + k] || LABEL[k] || k; }
   var LONG_KEYS = { text: 1, desc: 1, intro: 1, about: 1, story: 1, review: 1, idNotice: 1, backNotice: 1, code: 1, message: 1, note: 1 };
   /* 이미지 칸 : [올리기] 버튼이 붙어요 */
   var IMAGE_KEYS = { image: 1, sd: 1, tile: 1, icon: 1, customFront: 1, customBack: 1, pairImage: 1, titleImage: 1,
-                     wantedPaper: 1, ownerImage: 1 };
+                     wantedPaper: 1, ownerImage: 1, menuIcon: 1 };
   /* 색 칸 : 색 선택기가 붙어요 */
   var COLOR_KEYS = { themeColor: 1, color: 1, subColor: 1, textColor: 1, overlayColor: 1, fadeColor: 1, gridColor: 1,
                      cardColor: 1, readerColor: 1, pointColor: 1, lineColor: 1 };

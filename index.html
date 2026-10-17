@@ -503,7 +503,17 @@
 
       /* ----- 메뉴 그리기 ----- */
       const menuBox = document.getElementById("menu");
-      (S.menus || []).forEach(function (m, i) {
+      const menus = (S.menus || []).slice();
+      /* 스토리(타임라인) 메뉴 : 메인 메뉴에 #story 링크가 없으면 맨 아래에 자동으로 붙여요.
+         끄려면 storyPage.menu 를 false 로 (편집기 '스토리 페이지 설정' → 메인 메뉴에 보이기) */
+      const SP = S.storyPage || {};
+      if (SP.menu !== false && !menus.some(function (m) { return /^#\/?story\b/.test(String(m && m.link || "")); })) {
+        menus.push({ title: SP.menuTitle || "Timeline", desc: SP.menuDesc || "", link: "#story", icon: SP.menuIcon || "", newTab: false });
+      }
+      const menuArea = menuBox.closest(".menu-area");   /* 메뉴가 5개 이상이면 조금 촘촘하게 (addon.css) */
+      menuArea.style.setProperty("--menu-n", menus.length);
+      if (menus.length >= 5) menuArea.classList.add("is-many");
+      menus.forEach(function (m, i) {
         const num = m.num || String(i + 1).padStart(2, "0");
         const icon = m.icon ? '<img src="' + m.icon + '" alt="">' : defaultIcon;
         const target = m.newTab ? ' target="_blank" rel="noopener"' : "";

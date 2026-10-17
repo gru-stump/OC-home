@@ -94,3 +94,18 @@ img.oc-crop {
   .cd-sd.sd-rt,
   .cd-sd.sd-lt { top: calc(var(--sd-w, 230px) * -.14); bottom: auto; }
 }
+
+
+/* ---------- 메인 메뉴가 5개 이상일 때 ----------
+   (스토리 페이지 Timeline 메뉴가 붙으면 5개가 돼요)
+   · 막대 높이와 간격을 조금 줄이고
+   · 화면 높이가 낮으면 메뉴 묶음을 위로 올려서 마지막 메뉴가 잘리지 않게 해요.
+   메뉴가 4개 이하면 원래 모양 그대로예요.
+   ----------------------------------------- */
+@media (min-width: 769px) {
+  .menu-area.is-many {
+    top: min(calc(50% + 85px), calc(100% - var(--menu-n, 5) * 58px - 28px));
+  }
+  .menu-area.is-many .menu-list { gap: 10px; }
+  .menu-area.is-many .menu-item { height: 48px; }
+}
