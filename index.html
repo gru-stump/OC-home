@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Home</title>
   <link rel="stylesheet" href="style.css">
+  <!-- 새로 더한 기능 (캐릭터 이미지 카드 등) -->
+  <link rel="stylesheet" href="addon.css">
   <!-- 휴대폰 화면용 (폭 768px 이하에서만 적용, PC 화면엔 영향 없음) -->
   <link rel="stylesheet" href="mobile.css">
   <!-- 내용 데이터 (수정은 data.js 에서) -->
@@ -871,12 +873,14 @@
         const type = ["id", "ticket", "wanted", "custom"].indexOf(ch.type) > -1 ? ch.type : "id";
         const front = type === "custom" ? customFace(ch.customFront, "FRONT") :
                       type === "ticket" ? frontTicket(ch) : type === "wanted" ? frontWanted(ch) : frontId(ch);
-        const backFace = type === "custom" ? customFace(ch.customBack, "BACK") :
+        // 캐릭터 이미지만 넣은 경우(뒷면 비움): 뒤집어도 같은 이미지를 보여줘요
+        const solo = type === "custom" && ch.customFront && !ch.customBack;
+        const backFace = type === "custom" ? customFace(ch.customBack || ch.customFront, "BACK") :
                       type === "ticket" ? backTicket(ch) : type === "wanted" ? backWanted(ch) : backId(ch);
 
         document.body.classList.remove("is-flipped");
         holder.innerHTML =
-          '<div class="cd cd-' + type + '" style="--c:' + cardColor(ch.color) + ';--c2:' + cardSub(ch.subColor, ch.color) + ';--ct:' + cardText(ch.textColor, ch.color) + ';--cx-r:' + ((ch.customRadius != null) ? ch.customRadius : 12) + 'px">' +
+          '<div class="cd cd-' + type + (solo ? " cx-solo" : "") + '" style="--c:' + cardColor(ch.color) + ';--c2:' + cardSub(ch.subColor, ch.color) + ';--ct:' + cardText(ch.textColor, ch.color) + ';--cx-r:' + ((ch.customRadius != null) ? ch.customRadius : 12) + 'px">' +
             '<div class="cd-flip" id="cdFlip" title="눌러서 뒤집기">' +
               '<div class="cd-face cd-front">' + front + '</div>' +
               '<div class="cd-face cd-back">' + backFace + '</div>' +
@@ -1773,12 +1777,14 @@
       const type = ["id", "ticket", "wanted", "custom"].indexOf(O.type) > -1 ? O.type : "id";
       const faceF = type === "custom" ? customFace(O.customFront, "FRONT") :
                     type === "ticket" ? frontTicket(O) : type === "wanted" ? frontWanted(O) : front(O);
-      const faceB = type === "custom" ? customFace(O.customBack, "BACK") :
+      // 오너 이미지만 넣은 경우(뒷면 비움): 뒤집어도 같은 이미지를 보여줘요
+      const solo = type === "custom" && O.customFront && !O.customBack;
+      const faceB = type === "custom" ? customFace(O.customBack || O.customFront, "BACK") :
                     type === "ticket" ? backTicket(O) : type === "wanted" ? backWanted(O) : back(O);
 
       holder.setAttribute("data-type", type);
       holder.innerHTML =
-        '<div class="cd cd-' + type + (type === "id" ? " ow-card" : "") + '" style="--c:' + cardColor(O.color) + ';--c2:' + cardSub(O.subColor, O.color) + ';--ct:' + cardText(O.textColor, O.color) + ';--cx-r:' + ((O.customRadius != null) ? O.customRadius : 12) + 'px">' +
+        '<div class="cd cd-' + type + (type === "id" ? " ow-card" : "") + (solo ? " cx-solo" : "") + '" style="--c:' + cardColor(O.color) + ';--c2:' + cardSub(O.subColor, O.color) + ';--ct:' + cardText(O.textColor, O.color) + ';--cx-r:' + ((O.customRadius != null) ? O.customRadius : 12) + 'px">' +
           (type === "id" && O.strap !== false ? '<div class="ow-strap"><span>' + (O.strap || "") + '</span></div><div class="ow-clip"></div>' : "") +
           '<div class="cd-flip" id="cdFlip" title="눌러서 뒤집기">' +
             '<div class="cd-face cd-front">' + faceF + '</div>' +
