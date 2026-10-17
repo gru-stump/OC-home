@@ -35,7 +35,7 @@
     sd: 'SD 이미지', tile: '타일 이미지', tilePosition: '타일 사진 위치', name: '이름', nameEn: '영문 이름 / 직책',
     intro: '한 줄 소개', tags: '태그', seat: '좌석', gate: '입구', row: '열', number: '카드 번호',
     profile: '프로필 항목', value: '내용', quote: '대표 대사', story: '설정 글', gallery: '갤러리', caption: '이미지 설명',
-    relations: '관계', customFront: '앞면 이미지', customBack: '뒷면 이미지', customRatio: '카드 비율',
+    pos: '보이는 위치', relations: '관계', customFront: '앞면 이미지', customBack: '뒷면 이미지', customRatio: '카드 비율',
     customRadius: '모서리 둥글기', pairImage: '페어 페이지 사진',
     emptyText: '비었을 때 글', reviewTitle: '리뷰 목록 제목', sortText: '정렬 글자', replyButton: '답글 버튼 글자',
     bestCount: 'BEST 표시 개수', relationTabs: '관계 화면 탭 이름', timelineEmpty: '타임라인 비었을 때 글',
@@ -369,7 +369,7 @@
     return { members: m, pairName: '', pairNameSub: '', titleImage: '', label: '', sides: sides, reviews: [], gallery: [], timeline: [], trpg: [] };
   }
   var LIST_TPL = {
-    gallery: { image: '', caption: '' }, relations: { name: '', label: '', text: '', image: '', link: 0 },
+    gallery: { image: '', caption: '', pos: '50% 50%' }, relations: { name: '', label: '', text: '', image: '', link: 0 },
     profile: { label: '', value: '' }, reviews: { from: 1, to: 2, call: '', review: '', likes: 0, date: '', replies: [] },
     timeline: { date: '', title: '', text: '', image: '' },
     trpg: { title: '', system: 'CoC 7th', date: '', role: '', text: '', file: '', link: '' },
@@ -431,14 +431,82 @@
                   customFront: '', customBack: '', customRatio: '', customRadius: 12 }
   };
 
+  /* ==========================================================
+     갤러리 이미지 '보이는 위치' 맞추기
+     - 정사각형 썸네일과 같은 모양의 상자에서 이미지를 끌어 옮겨요.
+     - 값은 pos 칸에 "가로% 세로%" 로 저장돼요. (예: "50% 20%" → 위쪽이 보이게)
+     ========================================================== */
+  function parsePos(p) {
+    var m = /^(\d{1,3})% (\d{1,3})%$/.exec(p || '');
+    return m ? [Math.min(100, +m[1]), Math.min(100, +m[2])] : [50, 50];
+  }
+  function posPicker(obj) {
+    var xy = parsePos(obj.pos);
+    var img = h('img', { alt: '', draggable: 'false',
+      style: 'width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;user-select:none' });
+    var frame = h('div', { title: '끌어서 보일 위치를 맞춰요',
+      style: 'position:relative;width:160px;height:160px;border-radius:8px;overflow:hidden;background:#eee;cursor:grab;touch-action:none;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)' }, [img]);
+    var val = h('div', { style: 'font-size:12px;color:#666' });
+    var empty = h('div', { style: 'font-size:12px;color:#999', text: '이미지를 먼저 넣어 주세요.' });
+    var reset = h('button', { class: 'oha-mini', type: 'button', text: '가운데로' });
+    var top = h('button', { class: 'oha-mini', type: 'button', text: '위쪽' });
+    function show() {
+      img.style.objectPosition = xy[0] + '% ' + xy[1] + '%';
+      val.textContent = '가로 ' + xy[0] + '% · 세로 ' + xy[1] + '%';
+    }
+    function save() { obj.pos = xy[0] + '% ' + xy[1] + '%'; show(); touch(); }
+    function refresh() {
+      var has = !!obj.image;
+      frame.style.display = has ? '' : 'none'; empty.style.display = has ? 'none' : '';
+      if (has && img.getAttribute('src') !== obj.image) img.src = obj.image;
+      show();
+    }
+    reset.onclick = function () { xy = [50, 50]; save(); };
+    top.onclick = function () { xy = [xy[0], 15]; save(); };
+
+    /* 끌기 : 손가락 / 마우스를 움직인 만큼 사진이 따라 움직여요 */
+    var drag = null;
+    frame.addEventListener('pointerdown', function (e) {
+      if (!img.naturalWidth) return;
+      var W = frame.clientWidth, H = frame.clientHeight;
+      var sc = Math.max(W / img.naturalWidth, H / img.naturalHeight);
+      drag = { x: e.clientX, y: e.clientY, sx: xy[0], sy: xy[1],
+               ox: img.naturalWidth * sc - W, oy: img.naturalHeight * sc - H };   /* 상자 밖으로 남는 길이 */
+      frame.setPointerCapture(e.pointerId); frame.style.cursor = 'grabbing'; e.preventDefault();
+    });
+    frame.addEventListener('pointermove', function (e) {
+      if (!drag) return;
+      var nx = drag.ox > 1 ? drag.sx - (e.clientX - drag.x) / drag.ox * 100 : 50;
+      var ny = drag.oy > 1 ? drag.sy - (e.clientY - drag.y) / drag.oy * 100 : 50;
+      xy = [Math.round(Math.max(0, Math.min(100, nx))), Math.round(Math.max(0, Math.min(100, ny)))];
+      show();
+    });
+    function end() { if (!drag) return; drag = null; frame.style.cursor = 'grab'; save(); }
+    frame.addEventListener('pointerup', end);
+    frame.addEventListener('pointercancel', end);
+
+    var el = h('div', { style: 'display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap' }, [
+      frame, empty,
+      h('div', { style: 'display:flex;flex-direction:column;gap:8px' }, [
+        h('div', { style: 'font-size:12px;color:#888;line-height:1.5', text: '사진을 끌어서 썸네일에 보일 부분을 맞춰요.' }),
+        val, h('div', { style: 'display:flex;gap:6px' }, [top, reset])
+      ])
+    ]);
+    refresh();
+    return { el: el, refresh: refresh };
+  }
+
   function objectEd(obj, key) {
     var box = h('div');
     function draw() {
       box.innerHTML = '';
+      /* 갤러리 항목이면 '보이는 위치' 맞추기 상자를 붙여요 */
+      var picker = (key === 'gallery' && 'image' in obj) ? posPicker(obj) : null;
       Object.keys(obj).forEach(function (k) {
+        if (picker && k === 'pos') return;               /* pos 는 상자로 맞추니 글자 칸은 숨겨요 */
         var v = obj[k];
         var complex = v && typeof v === 'object';
-        var ed = valueEd(v, function (nv) { obj[k] = nv; }, k, key);
+        var ed = valueEd(v, function (nv) { obj[k] = nv; if (picker && k === 'image') picker.refresh(); }, k, key);
         if (complex) {
           var d = h('details', { class: 'oha-box' }, [h('summary', { text: LABEL[k] || k }), ed]);
           if (!Array.isArray(v)) d.open = false;
@@ -447,6 +515,7 @@
           box.appendChild(h('div', { class: 'oha-row' }, [h('div', { class: 'oha-lab', text: LABEL[k] || k }), ed]));
         }
       });
+      if (picker) box.appendChild(h('div', { class: 'oha-row' }, [h('div', { class: 'oha-lab', text: LABEL.pos }), picker.el]));
       var opt = OPTIONAL[key];
       if (opt) {
         var missing = Object.keys(opt).filter(function (k) { return !(k in obj); });
