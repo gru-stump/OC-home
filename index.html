@@ -870,7 +870,7 @@
       }
 
       function render(i) {
-        const ch = list[i];
+        const ch = OC_CARD.fillFront(list[i]);   /* 앞면 이미지가 비면 '이미지' 칸 그림 사용 (addon.js) */
         if (!ch) return;
         const type = ["id", "ticket", "wanted", "custom"].indexOf(ch.type) > -1 ? ch.type : "id";
         const front = type === "custom" ? customFace(ch.customFront, "FRONT") :
@@ -1776,6 +1776,7 @@
         document.body.classList.toggle("is-flipped", next);
       }
 
+      OC_CARD.fillFront(O);   /* 앞면 이미지가 비면 '이미지' 칸 그림 사용 (addon.js) */
       const type = ["id", "ticket", "wanted", "custom"].indexOf(O.type) > -1 ? O.type : "id";
       const faceF = type === "custom" ? customFace(O.customFront, "FRONT") :
                     type === "ticket" ? frontTicket(O) : type === "wanted" ? frontWanted(O) : front(O);

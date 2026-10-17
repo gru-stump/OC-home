@@ -35,7 +35,7 @@
     sd: 'SD 이미지', tile: '타일 이미지', tilePosition: '타일 사진 위치', name: '이름', nameEn: '영문 이름 / 직책',
     intro: '한 줄 소개', tags: '태그', seat: '좌석', gate: '입구', row: '열', number: '카드 번호',
     profile: '프로필 항목', value: '내용', quote: '대표 대사', story: '설정 글', gallery: '갤러리', caption: '이미지 설명',
-    pos: '보이는 영역 · 자르기', zoom: '확대', relations: '관계', customFront: '앞면 이미지', customBack: '뒷면 이미지', customRatio: '카드 비율',
+    pos: '보이는 영역 · 자르기', zoom: '확대', relations: '관계', customFront: '앞면 이미지 (캐릭터 이미지)', customBack: '뒷면 이미지 (비우면 앞면 그대로)', customRatio: '카드 비율',
     customRadius: '모서리 둥글기', pairImage: '페어 페이지 사진',
     emptyText: '비었을 때 글', reviewTitle: '리뷰 목록 제목', sortText: '정렬 글자', replyButton: '답글 버튼 글자',
     bestCount: 'BEST 표시 개수', relationTabs: '관계 화면 탭 이름', timelineEmpty: '타임라인 비었을 때 글',
@@ -533,17 +533,40 @@
     return { el: el, refresh: refresh };
   }
 
+  /* 종류가 '직접 만든 카드 · 캐릭터 이미지'면 앞면 · 뒷면 · 비율 · 둥글기 칸을 '종류' 바로 아래에 꺼내 둬요 */
+  var CUSTOM_FIELDS = { customFront: '', customBack: '', customRatio: '', customRadius: 12 };
+  function ensureCustom(obj) {
+    var keys = Object.keys(obj), vals = {};
+    keys.forEach(function (k) { vals[k] = obj[k]; });
+    Object.keys(CUSTOM_FIELDS).forEach(function (k) { if (!(k in vals)) vals[k] = CUSTOM_FIELDS[k]; });
+    var order = [];
+    keys.forEach(function (k) {
+      if (k in CUSTOM_FIELDS) return;
+      order.push(k);
+      if (k === 'type') Object.keys(CUSTOM_FIELDS).forEach(function (c) { order.push(c); });
+    });
+    if (order.indexOf('customFront') < 0) Object.keys(CUSTOM_FIELDS).forEach(function (c) { order.push(c); });
+    keys.forEach(function (k) { delete obj[k]; });
+    order.forEach(function (k) { obj[k] = vals[k]; });
+  }
+
   function objectEd(obj, key) {
     var box = h('div');
     function draw() {
       box.innerHTML = '';
+      var cardObj = (key === 'characters' || key === 'owner') && 'type' in obj;
+      if (cardObj && obj.type === 'custom') ensureCustom(obj);
       /* 갤러리 항목이면 '보이는 위치' 맞추기 상자를 붙여요 */
       var picker = (key === 'gallery' && 'image' in obj) ? posPicker(obj) : null;
       Object.keys(obj).forEach(function (k) {
         if (picker && (k === 'pos' || k === 'zoom')) return;   /* 자르기 값은 상자로 맞추니 글자 칸은 숨겨요 */
         var v = obj[k];
         var complex = v && typeof v === 'object';
-        var ed = valueEd(v, function (nv) { obj[k] = nv; if (picker && k === 'image') picker.refresh(); }, k, key);
+        var ed = valueEd(v, function (nv) {
+          obj[k] = nv;
+          if (picker && k === 'image') picker.refresh();
+          if (cardObj && k === 'type' && nv === 'custom') setTimeout(draw, 0);   /* 앞면 · 뒷면 칸 바로 보이게 */
+        }, k, key);
         if (complex) {
           var d = h('details', { class: 'oha-box' }, [h('summary', { text: LABEL[k] || k }), ed]);
           if (!Array.isArray(v)) d.open = false;

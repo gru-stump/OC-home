@@ -30,3 +30,15 @@ window.OC_CROP = (function () {
     }
   };
 })();
+
+/* ---------- 캐릭터 이미지 카드 : 앞면 이미지가 비었을 때 ----------
+   종류가 '직접 만든 카드 · 캐릭터 이미지'인데 앞면 이미지 칸이 비어 있고
+   '이미지' 칸에 그림이 있으면, 그 그림을 앞면으로 써요.
+   (화면에서만 채워요. 저장된 내용은 바뀌지 않아요.)
+   ----------------------------------------- */
+window.OC_CARD = {
+  fillFront: function (c) {
+    if (c && c.type === "custom" && !c.customFront && c.image) c.customFront = c.image;
+    return c;
+  }
+};
