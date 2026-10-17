@@ -23,7 +23,7 @@
 /* ---------- 머리말 ---------- */
 .gl-head { text-align: center; color: var(--deco); margin-bottom: 34px; }
 .gl-head h2 {
-  font-family: var(--font-menu), Impact, 'Arial Narrow', sans-serif;
+  font-family: var(--font-menu), var(--font-body), Impact, 'Arial Narrow', sans-serif;
   font-weight: 400;
   font-size: 64px;
   line-height: 1;
@@ -46,7 +46,7 @@
   border-radius: 999px;
   background: transparent;
   color: var(--deco);
-  font-family: var(--font-menu), Impact, 'Arial Narrow', sans-serif;
+  font-family: var(--font-menu), var(--font-body), Impact, 'Arial Narrow', sans-serif;
   font-size: 14px;
   letter-spacing: 2px;
   cursor: pointer;
@@ -60,7 +60,7 @@
 .gl-picks h3,
 .gl-grid-title {
   margin-bottom: 14px;
-  font-family: var(--font-menu), Impact, 'Arial Narrow', sans-serif;
+  font-family: var(--font-menu), var(--font-body), Impact, 'Arial Narrow', sans-serif;
   font-weight: 400;
   font-size: 15px;
   letter-spacing: 4px;
@@ -128,7 +128,7 @@
   width: 100%;
   height: 100%;
   min-height: 160px;
-  font-family: var(--font-menu), Impact, 'Arial Narrow', sans-serif;
+  font-family: var(--font-menu), var(--font-body), Impact, 'Arial Narrow', sans-serif;
   font-size: 18px;
   letter-spacing: 4px;
   opacity: .4;
@@ -144,7 +144,7 @@
   border-radius: 999px;
   background: rgba(0,0,0,.6);
   color: #fff;
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-mono), var(--font-body), monospace;
   font-size: 11px;
   font-weight: 700;
   backdrop-filter: blur(4px);
@@ -216,7 +216,7 @@
   pointer-events: none;
 }
 .gv-bar > * { pointer-events: auto; }
-.gv-pos { font-family: var(--font-mono), monospace; font-size: 12px; letter-spacing: 3px; opacity: .55; }
+.gv-pos { font-family: var(--font-mono), var(--font-body), monospace; font-size: 12px; letter-spacing: 3px; opacity: .55; }
 .gv-close { border: 0; background: none; color: inherit; font-size: 40px; line-height: 1; cursor: pointer; transition: transform .3s; }
 .gv-close:hover { transform: rotate(90deg); }
 
@@ -319,7 +319,7 @@
 .gv-strip button img { width: 100%; height: 100%; object-fit: cover; }
 .gv-strip button:hover { opacity: .85; }
 .gv-strip button.on { opacity: 1; border-color: var(--gl-point); }
-.gv-sub { margin-left: 8px; font-family: var(--font-mono), monospace; font-size: 11px; letter-spacing: 2px; opacity: .55; }
+.gv-sub { margin-left: 8px; font-family: var(--font-mono), var(--font-body), monospace; font-size: 11px; letter-spacing: 2px; opacity: .55; }
 
 /* 정보 */
 .gv-info { grid-area: info; align-self: center; display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
@@ -328,7 +328,7 @@
   border-radius: 999px;
   background: color-mix(in srgb, var(--gl-point) 16%, transparent);
   color: var(--gl-point);
-  font-family: var(--font-menu), Impact, 'Arial Narrow', sans-serif;
+  font-family: var(--font-menu), var(--font-body), Impact, 'Arial Narrow', sans-serif;
   font-size: 13px;
   letter-spacing: 2px;
 }
@@ -350,7 +350,7 @@
   border-radius: 10px;
   background: rgba(255,255,255,.03);
   color: inherit;
-  font-family: var(--font-menu), Impact, 'Arial Narrow', sans-serif;
+  font-family: var(--font-menu), var(--font-body), Impact, 'Arial Narrow', sans-serif;
   font-size: 11px;
   letter-spacing: 3px;
   text-align: left;

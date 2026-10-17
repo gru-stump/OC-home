@@ -25,7 +25,7 @@
 /* ---------- 머리말 ---------- */
 .st-head { text-align: center; color: var(--deco); margin-bottom: 70px; }
 .st-head h2 {
-  font-family: var(--font-menu), Impact, 'Arial Narrow', sans-serif;
+  font-family: var(--font-menu), var(--font-body), Impact, 'Arial Narrow', sans-serif;
   font-weight: 400;
   font-size: 64px;
   line-height: 1;
@@ -136,7 +136,7 @@
   border-radius: 999px;
   background: color-mix(in srgb, var(--st-point) 16%, transparent);
   color: var(--st-point);
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-mono), var(--font-body), monospace;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 1px;
@@ -168,7 +168,7 @@
   align-items: center;
   gap: 8px;
   margin-top: 6px;
-  font-family: var(--font-menu), Impact, 'Arial Narrow', sans-serif;
+  font-family: var(--font-menu), var(--font-body), Impact, 'Arial Narrow', sans-serif;
   font-size: 12px;
   letter-spacing: 3px;
   color: var(--st-point);
@@ -222,7 +222,7 @@
   pointer-events: none;
 }
 .sr-bar > * { pointer-events: auto; }
-.sr-pos { font-family: var(--font-mono), monospace; font-size: 12px; letter-spacing: 3px; opacity: .55; }
+.sr-pos { font-family: var(--font-mono), var(--font-body), monospace; font-size: 12px; letter-spacing: 3px; opacity: .55; }
 .sr-close { border: 0; background: none; color: inherit; font-size: 40px; line-height: 1; cursor: pointer; transition: transform .3s; }
 .sr-close:hover { transform: rotate(90deg); }
 
@@ -249,7 +249,7 @@
 .sr-pov {
   display: inline-block;
   margin-top: 18px;
-  font-family: var(--font-menu), Impact, 'Arial Narrow', sans-serif;
+  font-family: var(--font-menu), var(--font-body), Impact, 'Arial Narrow', sans-serif;
   font-size: 12px;
   letter-spacing: 3px;
   color: var(--st-point);
@@ -276,7 +276,7 @@
 .sr-gallery { margin-top: 70px; }
 .sr-gallery h4 {
   margin-bottom: 16px;
-  font-family: var(--font-menu), Impact, 'Arial Narrow', sans-serif;
+  font-family: var(--font-menu), var(--font-body), Impact, 'Arial Narrow', sans-serif;
   font-weight: 400;
   font-size: 15px;
   letter-spacing: 4px;
@@ -326,7 +326,7 @@
 .sr-nav-btn.next { text-align: right; align-items: flex-end; }
 .sr-nav-btn:hover { border-color: color-mix(in srgb, var(--st-point) 55%, transparent); background: color-mix(in srgb, var(--st-point) 8%, transparent); }
 .sr-nav-btn.off { visibility: hidden; }
-.sr-nav-btn small { font-family: var(--font-menu), Impact, 'Arial Narrow', sans-serif; font-size: 11px; letter-spacing: 3px; color: var(--st-point); }
+.sr-nav-btn small { font-family: var(--font-menu), var(--font-body), Impact, 'Arial Narrow', sans-serif; font-size: 11px; letter-spacing: 3px; color: var(--st-point); }
 .sr-nav-btn b { font-size: 16px; }
 .sr-nav-btn em { font-style: normal; font-size: 12px; opacity: .55; }
 
