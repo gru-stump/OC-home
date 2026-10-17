@@ -7,12 +7,16 @@
   <link rel="stylesheet" href="style.css">
   <!-- 새로 더한 기능 (캐릭터 이미지 카드 등) -->
   <link rel="stylesheet" href="addon.css">
+  <!-- 스토리 페이지(#story) 디자인 -->
+  <link rel="stylesheet" href="story.css">
   <!-- 휴대폰 화면용 (폭 768px 이하에서만 적용, PC 화면엔 영향 없음) -->
   <link rel="stylesheet" href="mobile.css">
   <!-- 내용 데이터 (수정은 data.js 에서) -->
   <script src="data.js"></script>
   <!-- 새로 더한 기능 (갤러리 자르기 등) -->
   <script src="addon.js"></script>
+  <!-- 스토리 페이지(#story) -->
+  <script src="story.js"></script>
   <script src="site.config.js"></script>
 
   <!-- 연결 설정(site.config.js) 적용 + 편집기에서 저장한 설정(Firestore site/config) 불러오기 -->
@@ -87,6 +91,7 @@
        - 페이지는 주소 뒤 # 으로 나뉘어요.
          메인 : index.html   캐릭터 : index.html#character
          페어 : index.html#pair   오너 : index.html#owner   방명록 : index.html#guest
+         스토리 : index.html#story
        - 내용 수정은 data.js 에서 해주세요.
        ========================================================= -->
 
@@ -256,6 +261,37 @@
   </main>
   </template>
 
+  <!-- ===== 페이지: story (story.js · story.css) ===== -->
+  <template id="tpl-story">
+  <main class="home st-page">
+    <!-- 왼쪽 위: 뱃지 (누르면 메인홈으로) -->
+    <a class="deco-top-left" id="decoTopLeft" href="#"></a>
+
+    <!-- 오른쪽 위: 홈 버튼 + 개수 -->
+    <div class="deco-top-right ch-top-right">
+      <a class="ch-home" href="#"><span class="mini-chev"><i></i><i></i><i></i></span>HOME</a>
+      <span class="ch-count" id="stCount"></span>
+    </div>
+
+    <!-- 시간선 + 사건 카드 -->
+    <div class="st-wrap" id="stWrap"></div>
+  </main>
+
+  <!-- 카드를 누르면 열리는 읽기 화면 -->
+  <div class="st-read" id="stRead"></div>
+
+  <!-- 이미지 크게 보기 -->
+  <div class="ch-box" id="stBox">
+    <button class="box-close" aria-label="닫기">×</button>
+    <button class="box-prev ch-arrow prev" aria-label="이전"><i></i><i></i><i></i></button>
+    <figure>
+      <div class="box-img"></div>
+      <figcaption class="box-cap"></figcaption>
+    </figure>
+    <button class="box-next ch-arrow next" aria-label="다음"><i></i><i></i><i></i></button>
+  </div>
+  </template>
+
   <script>
     (function () {
       const S = (typeof SITE !== "undefined") ? SITE : {};
@@ -388,8 +424,8 @@
       /* =====================================================
          페이지 이동 (주소 뒤 #이름)
          ===================================================== */
-      const ROUTES = ["home", "character", "pair", "owner", "guest"];
-      const TITLES = { home: "", character: "Character", pair: "Pair", owner: "Owner", guest: "Guest" };
+      const ROUTES = ["home", "character", "pair", "owner", "guest", "story"];
+      const TITLES = { home: "", character: "Character", pair: "Pair", owner: "Owner", guest: "Guest", story: "Story" };
 
       // "character.html" 처럼 적힌 링크도 "#character" 로 바꿔줘요
       function routeLink(l) {
@@ -2172,11 +2208,18 @@
       wrap.classList.add("mode-" + mode);
       };
 
+      /* ##################################################### */
+      /* ##### 페이지: story  (내용은 story.js) ##### */
+      /* ##################################################### */
+      PAGES.story = function () {
+        if (window.OC_STORY) OC_STORY.mount({ S: S, addKey: addKey, mix: mix, THEME: THEME });
+      };
+
       const app = document.getElementById("app");
       function show(route) {
         if (ROUTES.indexOf(route) < 0) route = "home";
         keyHandlers = [];
-        document.body.classList.remove("is-flipped", "no-tint", "sd-always", "ch-single");
+        document.body.classList.remove("is-flipped", "no-tint", "sd-always", "ch-single", "st-reading");
         document.body.setAttribute("data-page", route);
         app.innerHTML = document.getElementById("tpl-" + route).innerHTML;
         app.classList.remove("page-in");

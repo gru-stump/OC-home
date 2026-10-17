@@ -14,11 +14,12 @@
   var BASE = 'https://www.gstatic.com/firebasejs/' + VER + '/';
   var SKIP = { firebase: 1, admin: 1, firebaseSdk: 1 };      /* 편집기에서 건드리지 않는 항목 */
   var ORDER = ['themeColor', 'pageTitle', 'title', 'menus', 'deco', 'characterPage', 'characters',
-               'pairPage', 'pairs', 'owner', 'guest', 'colors', 'background', 'fonts'];
+               'pairPage', 'pairs', 'storyPage', 'stories', 'owner', 'guest', 'colors', 'background', 'fonts'];
   var TAB_NAME = {
     themeColor: '대표 색', pageTitle: '사이트 이름', title: '메인 타이틀', menus: '메인 메뉴', deco: '메인 꾸밈 글자',
     characterPage: '캐릭터 페이지 설정', characters: '캐릭터 목록', pairPage: '페어 페이지 설정', pairs: '페어 목록',
-    owner: '오너 페이지', guest: '방명록 안내', colors: '색상', background: '배경', fonts: '글꼴'
+    owner: '오너 페이지', guest: '방명록 안내', colors: '색상', background: '배경', fonts: '글꼴',
+    storyPage: '스토리 페이지 설정', stories: '스토리 목록'
   };
   var LABEL = {
     themeColor: '대표 색 (이 색 하나로 사이트 전체 색이 바뀌어요)', pageTitle: '브라우저 탭 이름',
@@ -59,14 +60,27 @@
     position: '사진 위치', overlay: '스크린 효과', overlayColor: '덮을 색', overlayStrength: '효과 세기(0~1)', blur: '흐림',
     fade: '아래 그라데이션', fadeColor: '그라데이션 색', fadeHeight: '그라데이션 높이(%)', fadeStrength: '그라데이션 진하기(0~1)',
     grid: '모눈 무늬', gridColor: '선 색', gridSize: '칸 크기', gridLine: '선 두께', gridStrength: '선 진하기(0~1)',
-    titleWeight: '타이틀 굵기', menu: '메뉴 글꼴', body: '본문 글꼴', mono: '번호 글꼴', hand: '손글씨 글꼴'
+    titleWeight: '타이틀 굵기', menu: '메뉴 글꼴', body: '본문 글꼴', mono: '번호 글꼴', hand: '손글씨 글꼴',
+    /* 스토리 페이지 (story.js) */
+    summary: '한줄요약', pov: '시점 · 작은 머리말', readMore: '카드 안내 글자', bodyEmpty: '본문이 비었을 때 글',
+    galleryTitle: '이미지 모음 제목', prevText: '이전 버튼 글자', nextText: '다음 버튼 글자',
+    cardColor: '카드 바탕색', readerColor: '읽기 화면 바탕색', pointColor: '날짜 · 점 색', lineColor: '시간선 색'
   };
+  /* 같은 칸 이름이라도 놓인 곳에 따라 다르게 부르는 이름 : '부모.칸' */
+  var LABEL_IN = {
+    'stories.date': '시간 (예: 약 20년 전)', 'stories.title': '제목', 'stories.image': '대표 이미지',
+    'stories.body': '본문 (줄마다 한 문단 · ― 한 줄은 장면 전환)', 'stories.gallery': '이미지 모음',
+    'storyPage.label': '왼쪽 위 라벨', 'storyPage.heading': '큰 제목', 'storyPage.subText': '큰 제목 아래 글',
+    'storyPage.emptyText': '이야기가 없을 때 글'
+  };
+  function labelOf(k, key) { return LABEL_IN[key + '.' + k] || LABEL[k] || k; }
   var LONG_KEYS = { text: 1, desc: 1, intro: 1, about: 1, story: 1, review: 1, idNotice: 1, backNotice: 1, code: 1, message: 1, note: 1 };
   /* 이미지 칸 : [올리기] 버튼이 붙어요 */
   var IMAGE_KEYS = { image: 1, sd: 1, tile: 1, icon: 1, customFront: 1, customBack: 1, pairImage: 1, titleImage: 1,
                      wantedPaper: 1, ownerImage: 1 };
   /* 색 칸 : 색 선택기가 붙어요 */
-  var COLOR_KEYS = { themeColor: 1, color: 1, subColor: 1, textColor: 1, overlayColor: 1, fadeColor: 1, gridColor: 1 };
+  var COLOR_KEYS = { themeColor: 1, color: 1, subColor: 1, textColor: 1, overlayColor: 1, fadeColor: 1, gridColor: 1,
+                     cardColor: 1, readerColor: 1, pointColor: 1, lineColor: 1 };
   /* 고르는 칸 : 부모 이름.칸 이름 → 선택지 */
   var SELECTS = {
     'characters.type': [['id', '학생증 / 사원증'], ['ticket', '공연 티켓'], ['wanted', '수배지'], ['custom', '직접 만든 카드 · 캐릭터 이미지']],
@@ -87,7 +101,7 @@
   /* 편집 탭 → 미리보기에서 보여줄 화면 */
   var TAB_ROUTE = { themeColor: '', pageTitle: '', title: '', menus: '', deco: '', colors: '', background: '', fonts: '',
                     characterPage: 'character', characters: 'character', pairPage: 'pair', pairs: 'pair',
-                    owner: 'owner', guest: 'guest', __gb: 'guest' };
+                    owner: 'owner', guest: 'guest', storyPage: 'story', stories: 'story', __gb: 'guest' };
 
   function $(sel, el) { return (el || document).querySelector(sel); }
   function h(tag, attrs, kids) {
@@ -156,7 +170,7 @@
   function previewPane() {
     var base = location.href.split('#')[0].split('?')[0];
     var pane = h('div', { class: 'oha-pv' });
-    var routes = [['', '메인'], ['character', 'Character'], ['pair', 'Pair'], ['owner', 'Owner'], ['guest', 'Guest']];
+    var routes = [['', '메인'], ['character', 'Character'], ['pair', 'Pair'], ['owner', 'Owner'], ['guest', 'Guest'], ['story', 'Story']];
     var sel = h('select', { id: 'oha-route', class: 'oha-in', style: 'width:auto;flex:1;min-width:0' },
       routes.map(function (r) { return h('option', { value: r[0], text: r[1] }); }));
     sel.value = st.pvRoute;
@@ -297,8 +311,9 @@
       return wrap;
     }
     var isImg = !!(IMAGE_KEYS[key] || IMAGE_KEYS[pkey]);
-    var long = LONG_KEYS[key] || String(val).indexOf('\n') >= 0;
+    var long = LONG_KEYS[key] || (key === 'body' && pkey === 'stories') || String(val).indexOf('\n') >= 0;
     var inp = long ? h('textarea', { class: 'oha-ta' }) : h('input', { class: 'oha-in', type: 'text' });
+    if (key === 'body' && pkey === 'stories') inp.style.minHeight = '320px';   /* 스토리 본문은 길어서 칸을 크게 */
     inp.value = val;
     inp.oninput = function () { set(inp.value); touch(); if (prev) prev.src = inp.value; };
     var prev = null;
@@ -399,7 +414,8 @@
     profile: { label: '', value: '' }, reviews: { from: 1, to: 2, call: '', review: '', likes: 0, date: '', replies: [] },
     timeline: { date: '', title: '', text: '', image: '' },
     trpg: { title: '', system: 'CoC 7th', date: '', role: '', text: '', file: '', link: '' },
-    sides: { catchphrase: '', desc: '', image: '' }, mine: { image: '', size: '200 × 40' }, friends: { name: '', image: '', url: '' }
+    sides: { catchphrase: '', desc: '', image: '' }, mine: { image: '', size: '200 × 40' }, friends: { name: '', image: '', url: '' },
+    stories: { date: '', title: '', summary: '', pov: '', image: '', body: '', gallery: [] }
   };
 
   function templatesFor(key, pkey) {
@@ -419,6 +435,7 @@
       { name: '페어 메뉴', desc: '#pair', value: { num: '', title: 'Pair', desc: '페어 소개', link: '#pair', icon: '', newTab: false } },
       { name: '오너 메뉴', desc: '#owner', value: { num: '', title: 'Owner', desc: '오너 소개', link: '#owner', icon: '', newTab: false } },
       { name: '방명록 메뉴', desc: '#guest', value: { num: '', title: 'Guest', desc: '방명록', link: '#guest', icon: '', newTab: false } },
+      { name: '스토리 메뉴', desc: '#story', value: { num: '', title: 'Story', desc: '이야기', link: '#story', icon: '', newTab: false } },
       { name: '다른 사이트 링크', desc: '새 탭으로 열려요', value: { num: '', title: '', desc: '', link: 'https://', icon: '', newTab: true } }
     ];
     if (key === 'members') return [{ name: '캐릭터 선택', desc: '', value: 1 }];
@@ -469,12 +486,13 @@
     return m ? [Math.min(100, +m[1]), Math.min(100, +m[2])] : [50, 50];
   }
   function parseZoom(z) { z = parseFloat(z); return isFinite(z) && z > 1 ? Math.min(5, z) : 1; }
-  function posPicker(obj) {
+  function posPicker(obj, ratio) {
     var xy = parsePos(obj.pos), zm = parseZoom(obj.zoom);
+    var fw = ratio ? 261 : 180, fh = ratio ? Math.round(261 / ratio) : 180;   /* ratio : 가로 ÷ 세로 (비우면 정사각형) */
     var img = h('img', { alt: '', draggable: 'false',
       style: 'width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;user-select:none' });
     var frame = h('div', { title: '끌어서 보일 부분을 맞춰요',
-      style: 'position:relative;width:180px;height:180px;border-radius:8px;overflow:hidden;background:#eee;cursor:grab;touch-action:none;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)' }, [img]);
+      style: 'position:relative;width:' + fw + 'px;height:' + fh + 'px;border-radius:8px;overflow:hidden;background:#eee;cursor:grab;touch-action:none;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)' }, [img]);
     var val = h('div', { style: 'font-size:12px;color:#666' });
     var empty = h('div', { style: 'font-size:12px;color:#999', text: '이미지를 먼저 넣어 주세요.' });
     var range = h('input', { type: 'range', min: '1', max: '5', step: '0.05', style: 'width:150px' });
@@ -610,7 +628,8 @@
       if (key === 'characterPage' && 'sdShow' in obj) ensureAfter(obj, 'sdSize' in obj ? 'sdSize' : 'sdShow',
         'sdSize' in obj ? { sdPos: 'rb', sdX: 0, sdY: 0 } : { sdSize: 230, sdPos: 'rb', sdX: 0, sdY: 0 });
       /* 갤러리 항목이면 '보이는 위치' 맞추기 상자를 붙여요 */
-      var picker = (key === 'gallery' && 'image' in obj) ? posPicker(obj) : null;
+      var picker = (key === 'gallery' && 'image' in obj) ? posPicker(obj)
+                 : (key === 'stories' && 'image' in obj) ? posPicker(obj, 2.9) : null;   /* 스토리 카드는 가로로 긴 틀 */
       Object.keys(obj).forEach(function (k) {
         if (picker && (k === 'pos' || k === 'zoom')) return;   /* 자르기 값은 상자로 맞추니 글자 칸은 숨겨요 */
         var v = obj[k];
@@ -621,11 +640,11 @@
           if (cardObj && k === 'type' && nv === 'custom') setTimeout(draw, 0);   /* 앞면 · 뒷면 칸 바로 보이게 */
         }, k, key);
         if (complex) {
-          var d = h('details', { class: 'oha-box' }, [h('summary', { text: LABEL[k] || k }), ed]);
+          var d = h('details', { class: 'oha-box' }, [h('summary', { text: labelOf(k, key) }), ed]);
           if (!Array.isArray(v)) d.open = false;
           box.appendChild(d);
         } else {
-          box.appendChild(h('div', { class: 'oha-row' }, [h('div', { class: 'oha-lab', text: LABEL[k] || k }), ed]));
+          box.appendChild(h('div', { class: 'oha-row' }, [h('div', { class: 'oha-lab', text: labelOf(k, key) }), ed]));
         }
       });
       if (picker) box.appendChild(h('div', { class: 'oha-row' }, [h('div', { class: 'oha-lab', text: LABEL.pos }), picker.el]));
