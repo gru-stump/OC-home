@@ -722,6 +722,7 @@
         const flipEl = document.getElementById("cdFlip");
         const apply = function (ratio) {
           flipEl.style.aspectRatio = String(ratio);
+          flipEl.style.setProperty("--r", String(ratio));   /* 크기 계산용 비율 (addon.css) */
           if (ratio >= 1) {                       // 가로로 긴 카드
             flipEl.style.width = "min(760px, 52vw, calc(58vh * " + ratio + "))";
             flipEl.style.height = "auto";
@@ -882,7 +883,7 @@
 
         document.body.classList.remove("is-flipped");
         holder.innerHTML =
-          '<div class="cd cd-' + type + (solo ? " cx-solo" : "") + '" style="--c:' + cardColor(ch.color) + ';--c2:' + cardSub(ch.subColor, ch.color) + ';--ct:' + cardText(ch.textColor, ch.color) + ';--cx-r:' + ((ch.customRadius != null) ? ch.customRadius : 12) + 'px">' +
+          '<div class="cd cd-' + type + (solo ? " cx-solo" : "") + '" style="--c:' + cardColor(ch.color) + ';--c2:' + cardSub(ch.subColor, ch.color) + ';--ct:' + cardText(ch.textColor, ch.color) + ';--cx-r:' + ((ch.customRadius != null) ? ch.customRadius : 12) + 'px;--cx-size:' + OC_CARD.size(ch) + '">' +
             '<div class="cd-flip" id="cdFlip" title="눌러서 뒤집기">' +
               '<div class="cd-face cd-front">' + front + '</div>' +
               '<div class="cd-face cd-back">' + backFace + '</div>' +
@@ -1599,6 +1600,7 @@
         const flipEl = document.getElementById("cdFlip");
         const apply = function (ratio) {
           flipEl.style.aspectRatio = String(ratio);
+          flipEl.style.setProperty("--r", String(ratio));   /* 크기 계산용 비율 (addon.css) */
           if (ratio >= 1) {                       // 가로로 긴 카드
             flipEl.style.width = "min(760px, 52vw, calc(58vh * " + ratio + "))";
             flipEl.style.height = "auto";
@@ -1787,7 +1789,7 @@
 
       holder.setAttribute("data-type", type);
       holder.innerHTML =
-        '<div class="cd cd-' + type + (type === "id" ? " ow-card" : "") + (solo ? " cx-solo" : "") + '" style="--c:' + cardColor(O.color) + ';--c2:' + cardSub(O.subColor, O.color) + ';--ct:' + cardText(O.textColor, O.color) + ';--cx-r:' + ((O.customRadius != null) ? O.customRadius : 12) + 'px">' +
+        '<div class="cd cd-' + type + (type === "id" ? " ow-card" : "") + (solo ? " cx-solo" : "") + '" style="--c:' + cardColor(O.color) + ';--c2:' + cardSub(O.subColor, O.color) + ';--ct:' + cardText(O.textColor, O.color) + ';--cx-r:' + ((O.customRadius != null) ? O.customRadius : 12) + 'px;--cx-size:' + OC_CARD.size(O) + '">' +
           (type === "id" && O.strap !== false ? '<div class="ow-strap"><span>' + (O.strap || "") + '</span></div><div class="ow-clip"></div>' : "") +
           '<div class="cd-flip" id="cdFlip" title="눌러서 뒤집기">' +
             '<div class="cd-face cd-front">' + faceF + '</div>' +

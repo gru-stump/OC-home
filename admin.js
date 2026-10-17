@@ -35,7 +35,7 @@
     sd: 'SD 이미지', tile: '타일 이미지', tilePosition: '타일 사진 위치', name: '이름', nameEn: '영문 이름 / 직책',
     intro: '한 줄 소개', tags: '태그', seat: '좌석', gate: '입구', row: '열', number: '카드 번호',
     profile: '프로필 항목', value: '내용', quote: '대표 대사', story: '설정 글', gallery: '갤러리', caption: '이미지 설명',
-    pos: '보이는 영역 · 자르기', zoom: '확대', relations: '관계', customFront: '앞면 이미지 (캐릭터 이미지)', customBack: '뒷면 이미지 (비우면 앞면 그대로)', customRatio: '카드 비율',
+    pos: '보이는 영역 · 자르기', zoom: '확대', relations: '관계', customFront: '앞면 이미지 (캐릭터 이미지)', customBack: '뒷면 이미지 (비우면 앞면 그대로)', customRatio: '카드 비율', customSize: '카드 크기 (%)',
     customRadius: '모서리 둥글기', pairImage: '페어 페이지 사진',
     emptyText: '비었을 때 글', reviewTitle: '리뷰 목록 제목', sortText: '정렬 글자', replyButton: '답글 버튼 글자',
     bestCount: 'BEST 표시 개수', relationTabs: '관계 화면 탭 이름', timelineEmpty: '타임라인 비었을 때 글',
@@ -71,6 +71,8 @@
   var SELECTS = {
     'characters.type': [['id', '학생증 / 사원증'], ['ticket', '공연 티켓'], ['wanted', '수배지'], ['custom', '직접 만든 카드 · 캐릭터 이미지']],
     'owner.type': [['id', '학생증 / 사원증'], ['ticket', '공연 티켓'], ['wanted', '수배지'], ['custom', '직접 만든 카드 · 캐릭터 이미지']],
+    'characters.customRatio': [['', '자동 (이미지 비율 그대로)'], ['1 / 1', '1:1 정사각형'], ['2 / 3', '2:3 세로'], ['3 / 4', '3:4 세로'], ['4 / 5', '4:5 세로'], ['9 / 16', '9:16 세로로 길게'], ['3 / 2', '3:2 가로'], ['4 / 3', '4:3 가로'], ['16 / 9', '16:9 가로로 길게']],
+    'owner.customRatio': [['', '자동 (이미지 비율 그대로)'], ['1 / 1', '1:1 정사각형'], ['2 / 3', '2:3 세로'], ['3 / 4', '3:4 세로'], ['4 / 5', '4:5 세로'], ['9 / 16', '9:16 세로로 길게'], ['3 / 2', '3:2 가로'], ['4 / 3', '4:3 가로'], ['16 / 9', '16:9 가로로 길게']],
     'title.type': [['text', '글자'], ['image', '로고 이미지']],
     'characterPage.sdShow': [['back', '카드를 뒤집었을 때만'], ['always', '항상']],
     'guest.mode': [['firebase', 'Firebase (비밀글 / 답글 / 삭제)'], ['form', '구글 폼 + 시트'], ['widget', '외부 위젯'], ['links', '익명 질문 링크만']]
@@ -336,6 +338,15 @@
       rs.onchange = function () { set(Number(rs.value)); touch(); };
       return rs;
     }
+    if (key === 'customSize') {
+      /* 카드 크기 : 막대로 30 ~ 100% */
+      var sv = Math.max(30, Math.min(100, Number(val) || 100));
+      var rg = h('input', { type: 'range', min: '30', max: '100', step: '5', style: 'flex:1;max-width:260px' }); rg.value = sv;
+      var out = h('b', { style: 'min-width:46px;font-size:13px', text: sv + '%' });
+      rg.oninput = function () { out.textContent = rg.value + '%'; set(Number(rg.value)); touch(); };
+      return h('div', { class: 'oha-img', style: 'align-items:center' },
+        [rg, out, h('small', { style: 'color:#888', text: '100% = 화면에 들어가는 최대 크기' })]);
+    }
     if (typeof val === 'number') {
       var n = h('input', { class: 'oha-in', type: 'number', step: 'any' }); n.value = val;
       n.oninput = function () { set(n.value === '' ? 0 : Number(n.value)); touch(); };
@@ -359,7 +370,7 @@
     if (type === 'id') x = { cardTitle: 'STUDENT ID', cardSub: '', number: '0001', profile: profileRows(['나이', '키', '생일', '좋아하는 것', '싫어하는 것']) };
     if (type === 'ticket') x = { cardTitle: 'LIVE CONCERT', cardSub: 'WORLD TOUR', seat: { gate: 'A', row: '01', seat: '01' }, number: '', profile: profileRows(['공연일', '공연장', '나이', '키']) };
     if (type === 'wanted') x = { cardTitle: 'WANTED', cardSub: 'DEAD OR ALIVE', number: '$0.00', profile: profileRows(['나이', '출신', '최근 목격', '별명', '죄목', '직업']) };
-    if (type === 'custom') x = { customFront: '', customBack: '', customRatio: '', customRadius: 12, cardTitle: 'MY CARD', number: '', profile: profileRows(['나이', '키']) };
+    if (type === 'custom') x = { customFront: '', customBack: '', customRatio: '', customSize: 100, customRadius: 12, cardTitle: 'MY CARD', number: '', profile: profileRows(['나이', '키']) };
     var o = {}; [base, x, tail].forEach(function (src) { Object.keys(src).forEach(function (k) { o[k] = src[k]; }); });
     return o;
   }
@@ -428,7 +439,7 @@
   /* 칸이 없는 항목을 나중에 다시 꺼내 쓰는 "+ 항목 추가" 목록 */
   var OPTIONAL = {
     characters: { pairImage: '', sdSize: 230, subColor: '', textColor: '', seat: { gate: 'A', row: '01', seat: '01' },
-                  customFront: '', customBack: '', customRatio: '', customRadius: 12 }
+                  customFront: '', customBack: '', customRatio: '', customSize: 100, customRadius: 12 }
   };
 
   /* ==========================================================
@@ -534,7 +545,7 @@
   }
 
   /* 종류가 '직접 만든 카드 · 캐릭터 이미지'면 앞면 · 뒷면 · 비율 · 둥글기 칸을 '종류' 바로 아래에 꺼내 둬요 */
-  var CUSTOM_FIELDS = { customFront: '', customBack: '', customRatio: '', customRadius: 12 };
+  var CUSTOM_FIELDS = { customFront: '', customBack: '', customRatio: '', customSize: 100, customRadius: 12 };
   function ensureCustom(obj) {
     var keys = Object.keys(obj), vals = {};
     keys.forEach(function (k) { vals[k] = obj[k]; });

@@ -11,20 +11,27 @@
    ----------------------------------------- */
 .cd-custom.cx-solo { --rot: 0deg; }
 
-/* 캐릭터 이미지 카드는 화면을 크게 차지하게 (원래 카드는 화면 높이의 60% 정도)
-   · PC : 화면 높이에서 위·아래 여백만 빼고 거의 꽉 차게
-   · 가로로 긴 그림은 화면 폭의 62%까지 */
-.cd-custom.cx-solo .cd-flip {
-  height: min(860px, calc(100vh - 170px)) !important;
-  width: auto !important;
-  max-width: min(1000px, 62vw);
+/* ---------- 직접 만든 카드 · 캐릭터 이미지 크기 ----------
+   앞면만 넣은 카드도, 앞·뒷면을 다 넣은 카드도 크게 보여줘요.
+   · --r       : 카드 비율 (가로 ÷ 세로). 편집기 '카드 비율' 또는 이미지 비율
+   · --cx-size : 편집기 '카드 크기 (%)' → 0.3 ~ 1  (100% = 화면이 허락하는 최대)
+   PC  : 화면 높이(위·아래 여백 뺀 만큼)와 화면 폭 62% 중 작은 쪽에 맞춰요.
+   휴대폰 : 화면 폭 90% 기준.
+   ----------------------------------------- */
+.cd-custom .cd-flip {
+  width: calc(min(62vw, 1000px, (100vh - 170px) * var(--r, .7), 860px * var(--r, .7)) * var(--cx-size, 1)) !important;
+  height: auto !important;
 }
-/* 휴대폰 : 화면 폭 가득 */
+/* 뒤집어서 옆에 상세 프로필이 나올 때는 그 칸 안에 들어가게 */
+.is-flipped .cd-custom .cd-flip {
+  width: calc(min(44vw, (100vh - 170px) * var(--r, .7), 860px * var(--r, .7)) * var(--cx-size, 1)) !important;
+}
+.is-flipped .ch-holder[data-type="custom-wide"] { transform: scale(.82); }
 @media (max-width: 768px) {
-  .ch-holder[data-type] .cd-custom.cx-solo .cd-flip {
-    width: min(440px, 90vw) !important;
+  .ch-holder[data-type] .cd-custom .cd-flip,
+  .is-flipped .ch-holder[data-type] .cd-custom .cd-flip {
+    width: calc(min(440px, 90vw) * var(--cx-size, 1)) !important;
     height: auto !important;
-    max-width: none;
   }
 }
 

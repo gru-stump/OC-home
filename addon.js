@@ -40,5 +40,10 @@ window.OC_CARD = {
   fillFront: function (c) {
     if (c && c.type === "custom" && !c.customFront && c.image) c.customFront = c.image;
     return c;
+  },
+  /* 카드 크기 : 편집기의 '카드 크기 (%)' → 0.3 ~ 1  (비우면 100% = 화면이 허락하는 최대) */
+  size: function (c) {
+    var n = parseFloat(c && c.customSize);
+    return isFinite(n) && n > 0 ? Math.max(30, Math.min(100, n)) / 100 : 1;
   }
 };
