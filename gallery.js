@@ -30,6 +30,9 @@ window.OC_GALLERY = (function () {
       const imgs = [{ image: x.image || "", caption: "" }].concat((x.more || []).filter(function (m) { return m && m.image; }));
       return { x: x, i: i, imgs: imgs };
     });
+    /* 보이는 순서 : 기본은 새로 등록한 그림(목록 맨 아래에 추가된 것)이 왼쪽 위로.
+       편집기 '그림 보이는 순서'에서 '그림 목록 순서 그대로'를 고르면 목록 순서대로. */
+    if (P.order !== "list") list.reverse();
 
     const set = function (k, v) { if (v) document.documentElement.style.setProperty(k, v); };
     set("--gl-viewer", P.viewerColor || (mix ? mix(THEME, "#060606", 0.88) : "#0c0c0c"));
@@ -57,7 +60,8 @@ window.OC_GALLERY = (function () {
 
     /* ----- AU 버튼 (그림에 적힌 AU 를 모아서 자동으로) ----- */
     const aus = [];
-    list.forEach(function (o) { const a = (o.x.au || "").trim(); if (a && aus.indexOf(a) < 0) aus.push(a); });
+    list.slice().sort(function (p, q) { return p.i - q.i; })   /* AU 버튼은 목록 순서대로 */
+      .forEach(function (o) { const a = (o.x.au || "").trim(); if (a && aus.indexOf(a) < 0) aus.push(a); });
     let au = "";
 
     /* 가림을 푼 그림 (이번 방문 동안 기억) */

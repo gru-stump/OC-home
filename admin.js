@@ -84,7 +84,7 @@
     'artworks.story': '연결할 이야기', 'artworks.hideText': '가린 그림 위 글 (비우면 기본)',
     'galleryPage.label': '왼쪽 위 라벨', 'galleryPage.heading': '큰 제목', 'galleryPage.subText': '큰 제목 아래 글',
     'galleryPage.emptyText': '그림이 없을 때 글', 'galleryPage.hideText': '가린 그림 위 기본 글',
-    'galleryPage.pointColor': 'AU · 버튼 강조색', 'galleryPage.menu': '메인 메뉴에 자동으로 붙이기 (편집기 메인 메뉴로 옮긴 뒤엔 꺼져요)',
+    'galleryPage.pointColor': 'AU · 버튼 강조색', 'galleryPage.order': '그림 보이는 순서', 'galleryPage.menu': '메인 메뉴에 자동으로 붙이기 (편집기 메인 메뉴로 옮긴 뒤엔 꺼져요)',
     'galleryPage.menuTitle': '메인 메뉴 이름', 'galleryPage.menuDesc': '메인 메뉴 설명', 'galleryPage.menuIcon': '메인 메뉴 아이콘', 'storyPage.menu': '메인 메뉴에 자동으로 붙이기 (편집기 메인 메뉴로 옮긴 뒤엔 꺼져요)',
     'storyPage.menuTitle': '메인 메뉴 이름', 'storyPage.menuDesc': '메인 메뉴 설명', 'storyPage.menuIcon': '메인 메뉴 아이콘'
   };
@@ -109,6 +109,7 @@
     'characters.sdPos': [['', '캐릭터 페이지 설정 따름']].concat([['rb', '오른쪽 아래'], ['lb', '왼쪽 아래'], ['rt', '오른쪽 위'], ['lt', '왼쪽 위']]),
     'owner.sdPos': [['', '캐릭터 페이지 설정 따름']].concat([['rb', '오른쪽 아래'], ['lb', '왼쪽 아래'], ['rt', '오른쪽 위'], ['lt', '왼쪽 위']]),
     'characterPage.sdShow': [['back', '카드를 뒤집었을 때만'], ['always', '항상']],
+    'galleryPage.order': [['new', '새로 등록한 그림이 먼저 (왼쪽 위부터)'], ['list', '그림 목록 순서 그대로']],
     'galleryPage.thumbRatio': [['3 / 4', '세로 3:4 (전신 그림에 좋아요)'], ['1 / 1', '정사각형'], ['4 / 5', '세로 4:5'], ['auto', '원본 비율 그대로 (벽돌 쌓기)']],
     'artworks.chars': [['', '(비워두기)'], ['천령', '천령'], ['무영', '무영'], ['천령 · 무영', '천령 · 무영']],
     'guest.mode': [['firebase', 'Firebase (비밀글 / 답글 / 삭제)'], ['form', '구글 폼 + 시트'], ['widget', '외부 위젯'], ['links', '익명 질문 링크만']]
@@ -733,6 +734,7 @@
       var cardObj = (key === 'characters' || key === 'owner') && 'type' in obj;
       if (cardObj && obj.type === 'custom') ensureCustom(obj);
       /* 스토리 페이지 색 칸 : 예전에 저장한 설정에 없던 칸도 항상 보이게 (값은 그대로) */
+      if (key === 'galleryPage') ensureAfter(obj, 'thumbRatio', { order: 'new' });
       if (key === 'storyPage') ensureAfter(obj, 'pointColor', { lineColor: '', hoverColor: '', cardOpacity: 85 });
       if ((key === 'characters' || key === 'owner') && 'sd' in obj) ensureAfter(obj, 'sd', { sdSize: '', sdPos: '', sdX: '', sdY: '', sdMobileSize: '', sdMobileX: '', sdMobileY: '' });
       if (key === 'characterPage' && 'sdShow' in obj) ensureAfter(obj, 'sdSize' in obj ? 'sdSize' : 'sdShow',

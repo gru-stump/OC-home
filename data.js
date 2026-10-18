@@ -1509,6 +1509,7 @@ const SITE = {
        menu        : true → 메인 메뉴에 Gallery 자동으로 붙이기
        menuTitle / menuDesc / menuIcon : 메인 메뉴 이름 · 설명 · 아이콘
        label / heading / subText : 왼쪽 위 라벨 · 큰 제목 · 아래 작은 글
+       order       : 그림 보이는 순서  "new" 새로 등록한 그림이 먼저(기본) · "list" 목록 순서 그대로
        thumbRatio  : 썸네일 모양  "3 / 4" 세로 · "1 / 1" 정사각형 · "auto" 원본 비율(벽돌 쌓기)
        allText     : AU 버튼 중 '전체' 버튼 글자
        pickTitle   : 대표작 묶음 제목
@@ -1544,6 +1545,7 @@ const SITE = {
     heading: "GALLERY",
     subText: "천령 × 무영",
     emptyText: "아직 등록된 그림이 없어요.",
+    order: "new",             // "new" 새로 등록한 그림이 왼쪽 위 · "list" 목록 순서 그대로
     thumbRatio: "3 / 4",
     allText: "ALL",
     pickTitle: "PICK",
