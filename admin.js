@@ -258,6 +258,8 @@
       '.oha-ta{min-height:76px;resize:vertical}' +
       '.oha-img{display:flex;gap:8px;align-items:center}.oha-img img{width:38px;height:38px;object-fit:cover;border-radius:6px;border:1px solid #ddd;background:#eee}' +
       '.oha-box{border:1px solid #e2e2e2;border-radius:10px;padding:10px 12px;margin:8px 0;background:#fcfcfc}' +
+      '.oha-item{scroll-margin-top:84px}.oha-item[open]{background:#fff;border-color:' + point + ';box-shadow:0 2px 10px rgba(0,0,0,.06)}' +
+      '.oha-item[open]>summary{font-weight:700}' +
       '.oha-box>summary{cursor:pointer;font-weight:700;display:flex;gap:8px;align-items:center}' +
       '.oha-box>summary .oha-sp{flex:1}.oha-mini{border:1px solid #ccc;background:#fff;border-radius:6px;padding:2px 8px;font-size:12px;cursor:pointer}' +
       '.oha-add{margin-top:6px}.oha-note{color:#777;font-size:12px;margin:4px 0}' +
@@ -783,6 +785,7 @@
 
   function arrayEd(arr, key, pkey) {
     var box = h('div');
+    var openI = -1;   /* 지금 펼쳐 둔 항목 (하나만 펼쳐요) */
     function draw() {
       box.innerHTML = '';
       var simple = arr.every(function (x) { return typeof x !== 'object'; });
@@ -791,9 +794,9 @@
           var up = h('button', { class: 'oha-mini', type: 'button', text: '↑' });
           var dn = h('button', { class: 'oha-mini', type: 'button', text: '↓' });
           var rm = h('button', { class: 'oha-mini', type: 'button', text: '✕' });
-          up.onclick = function (e) { e.preventDefault(); if (i > 0) { var isC = arr === chars(); arr.splice(i - 1, 0, arr.splice(i, 1)[0]); if (isC) swapRefs(i, i - 1); touch(); draw(); } };
-          dn.onclick = function (e) { e.preventDefault(); if (i < arr.length - 1) { var isC = arr === chars(); arr.splice(i + 1, 0, arr.splice(i, 1)[0]); if (isC) swapRefs(i, i + 1); touch(); draw(); } };
-          rm.onclick = function (e) { e.preventDefault(); var isC = arr === chars(); if (confirm(isC ? '이 캐릭터를 지울까요? 이 캐릭터가 들어간 페어 멤버 · 리뷰 · 관계 링크도 같이 정리돼요.' : '이 항목을 지울까요?')) { arr.splice(i, 1); if (isC) removeRefs(i); touch(); draw(); } };
+          up.onclick = function (e) { e.preventDefault(); if (i > 0) { if (openI === i) openI = i - 1; else if (openI === i - 1) openI = i; var isC = arr === chars(); arr.splice(i - 1, 0, arr.splice(i, 1)[0]); if (isC) swapRefs(i, i - 1); touch(); draw(); } };
+          dn.onclick = function (e) { e.preventDefault(); if (i < arr.length - 1) { if (openI === i) openI = i + 1; else if (openI === i + 1) openI = i; var isC = arr === chars(); arr.splice(i + 1, 0, arr.splice(i, 1)[0]); if (isC) swapRefs(i, i + 1); touch(); draw(); } };
+          rm.onclick = function (e) { e.preventDefault(); var isC = arr === chars(); if (confirm(isC ? '이 캐릭터를 지울까요? 이 캐릭터가 들어간 페어 멤버 · 리뷰 · 관계 링크도 같이 정리돼요.' : '이 항목을 지울까요?')) { arr.splice(i, 1); if (isC) removeRefs(i); if (openI === i) openI = -1; else if (openI > i) openI--; touch(); draw(); } };
           return [up, dn, rm];
         };
         if (simple) {                                   /* 문자열 / 숫자 목록 : 한 줄 */
@@ -807,14 +810,25 @@
           box.appendChild(h('div', { class: 'oha-img' }, cells.concat(ctl())));
         } else {                                        /* 객체 목록 : 카드 */
           var sum = h('summary', null, [h('span', { text: title(item, i) }), h('span', { class: 'oha-sp' })].concat(ctl()));
-          var d = h('details', { class: 'oha-box' }, [sum, valueEd(item, function (nv) { arr[i] = nv; }, key, key)]);
+          var d = h('details', { class: 'oha-box oha-item' }, [sum, valueEd(item, function (nv) { arr[i] = nv; }, key, key)]);
+          if (i === openI) d.open = true;
+          /* 하나를 펼치면 같은 목록의 다른 항목은 접어요 → 지금 연 것에만 집중 */
+          d.addEventListener('toggle', function () {
+            if (!d.open) { if (openI === i) openI = -1; return; }
+            openI = i;
+            [].forEach.call(box.children, function (o) { if (o !== d && o.classList && o.classList.contains('oha-item') && o.open) o.open = false; });
+            requestAnimationFrame(function () {
+              var top = sum.getBoundingClientRect().top;
+              if (top < 70 || top > window.innerHeight - 80) sum.scrollIntoView({ block: 'start', behavior: 'smooth' });
+            });
+          });
           box.appendChild(d);
         }
       });
       var tpls = templatesFor(key, pkey);
       var add = h('button', { class: 'oha-btn oha-add', type: 'button', text: tpls.length > 1 ? '+ 추가 ▾' : '+ 추가' });
       var menu = h('div', { class: 'oha-menu' }); menu.hidden = true;
-      function push(v) { arr.push(v); touch(); menu.hidden = true; draw(); }
+      function push(v) { arr.push(v); openI = arr.length - 1; touch(); menu.hidden = true; draw(); }   /* 새로 추가한 항목은 펼쳐서 */
       add.onclick = function () {
         if (!tpls.length) { push(arr.length ? blank(arr[arr.length - 1]) : ''); return; }
         if (tpls.length === 1) { push(clone(tpls[0].value)); return; }
