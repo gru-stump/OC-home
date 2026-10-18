@@ -148,9 +148,3 @@ img.oc-crop {
 /* 3) 뒤집을 때 들어오는 대각선 배경 · 고정 배경 : 각자 따로 움직이게 */
 .ch-detail-bg { will-change: transform; }
 .bg-photo, .bg-overlay, .bg-grid, .bg-fade { will-change: transform; }
-
-/* 4) 움직임 줄이기를 켠 사용자(기기 설정)는 큰 움직임 생략 */
-@media (prefers-reduced-motion: reduce) {
-  .cd-flip, .ch-stage, .ch-holder, .ch-detail-bg, .ch-detail, .ch-detail > *, .cd-sd { transition-duration: .01s !important; }
-  .cd { animation: none !important; }
-}
