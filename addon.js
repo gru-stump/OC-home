@@ -51,6 +51,8 @@ window.OC_CARD = {
    · sdPos : 위치  rb 오른쪽 아래(기본) / lb 왼쪽 아래 / rt 오른쪽 위 / lt 왼쪽 위
    · sdX   : 가로 미세조정 (px, + 오른쪽 / − 왼쪽)
    · sdY   : 세로 미세조정 (px, + 아래 / − 위)
+   · sdMobileSize : 휴대폰 크기 (PC 크기 대비 %, 기본 90)
+   · sdMobileX / sdMobileY : 휴대폰 미세조정 (px). 휴대폰에서는 PC 미세조정 대신 이 값을 써요
    캐릭터(또는 오너)에 적은 값 → 없으면 캐릭터 페이지 설정 값 → 없으면 기본
    ----------------------------------------- */
 window.OC_SD = (function () {
@@ -67,7 +69,10 @@ window.OC_SD = (function () {
     },
     vars: function (o, P) {
       var x = pick(o, P, "sdX"), y = pick(o, P, "sdY");
-      return ";--sd-x:" + num(x) + "px;--sd-y:" + num(y) + "px";
+      var ms = parseFloat(pick(o, P, "sdMobileSize"));
+      ms = isFinite(ms) && ms > 0 ? Math.max(30, Math.min(150, ms)) / 100 : 0.9;
+      return ";--sd-x:" + num(x) + "px;--sd-y:" + num(y) + "px" +
+             ";--sd-ms:" + ms + ";--sd-mx:" + num(pick(o, P, "sdMobileX")) + "px;--sd-my:" + num(pick(o, P, "sdMobileY")) + "px";
     }
   };
 })();

@@ -206,11 +206,14 @@
   .cd-flip.flipped:hover { transform: rotateY(180deg); }
   .cd-hint { margin-top: 16px; font-size: 10px; letter-spacing: 3px; }
 
-  /* SD 캐릭터 : 작게 */
+  /* SD 캐릭터 : 휴대폰 크기(기본 PC의 90%) · 카드 모서리 안쪽으로 살짝 겹치게
+     편집기 'SD 휴대폰 크기 / 휴대폰 가로·세로 미세조정'으로 따로 맞출 수 있어요 */
   .cd-sd {
-    width: calc(var(--sd-w, 230px) * .6);
-    right: calc(var(--sd-w, 230px) * -.04);
-    bottom: calc(var(--sd-w, 230px) * -.14);
+    --sd-mw: calc(var(--sd-w, 230px) * var(--sd-ms, .9));
+    width: var(--sd-mw);
+    right: calc(var(--sd-mw) * .06);
+    bottom: calc(var(--sd-mw) * -.12);
+    translate: var(--sd-mx, 0px) var(--sd-my, 0px);
   }
 
   /* 뒤집었을 때 깔리는 대각선 색 배경 : 화면 전체 */

@@ -90,9 +90,9 @@ img.oc-crop {
 .is-flipped .cd-sd.sd-lt, .sd-always .cd-sd.sd-lt { transform: scale(1) rotate(-6deg); }
 @media (max-width: 768px) {
   .cd-sd.sd-lb,
-  .cd-sd.sd-lt { left: calc(var(--sd-w, 230px) * -.04); right: auto; }
+  .cd-sd.sd-lt { left: calc(var(--sd-mw) * .06); right: auto; }
   .cd-sd.sd-rt,
-  .cd-sd.sd-lt { top: calc(var(--sd-w, 230px) * -.14); bottom: auto; }
+  .cd-sd.sd-lt { top: calc(var(--sd-mw) * -.12); bottom: auto; }
 }
 
 
