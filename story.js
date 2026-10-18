@@ -9,17 +9,20 @@
 window.OC_STORY = (function () {
 
   /* ----- 본문 글 → 문단 -----
-     · 줄마다 한 문단이 돼요. (빈 줄은 무시)
+     · 줄마다 한 문단이 돼요.
+     · 빈 줄을 넣으면 그 자리에 한 줄 정도 더 띄어요. (호흡 · 장면 안의 전환)
+       빈 줄을 여러 개 넣어도 한 번만 띄어요.
      · 한 줄에 ― / — / --- / *** / * 만 있으면 장면 전환 표시가 돼요.
      · <br>, <b> 같은 글자 꾸밈은 그대로 쓸 수 있어요. */
   const BREAK = /^\s*(―+|—+|-{3,}|\*{1,3}|·{3})\s*$/;
   function paragraphs(text) {
     const lines = String(text || "").replace(/\r/g, "").split("\n");
-    let out = "";
+    let out = "", gap = false;
     lines.forEach(function (l) {
-      if (!l.trim()) return;
-      if (BREAK.test(l)) { out += '<p class="sr-break" aria-hidden="true"><i></i><i></i><i></i></p>'; return; }
-      out += "<p>" + l.trim() + "</p>";
+      if (!l.trim()) { if (out) gap = true; return; }
+      if (BREAK.test(l)) { out += '<p class="sr-break" aria-hidden="true"><i></i><i></i><i></i></p>'; gap = false; return; }
+      out += (gap ? '<p class="sr-gap">' : "<p>") + l.trim() + "</p>";
+      gap = false;
     });
     return out;
   }
