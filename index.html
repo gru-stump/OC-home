@@ -963,7 +963,7 @@
         document.body.classList.remove("is-flipped");
         holder.innerHTML =
           '<div class="cd cd-' + type + (solo ? " cx-solo" : "") + '" style="--c:' + cardColor(ch.color) + ';--c2:' + cardSub(ch.subColor, ch.color) + ';--ct:' + cardText(ch.textColor, ch.color) + ';--cx-r:' + ((ch.customRadius != null) ? ch.customRadius : 12) + 'px;--cx-size:' + OC_CARD.size(ch) + '">' +
-            '<div class="cd-flip" id="cdFlip" title="눌러서 뒤집기">' +
+            '<div class="cd-flip" id="cdFlip">' +
               '<div class="cd-face cd-front">' + front + '</div>' +
               '<div class="cd-face cd-back">' + backFace + '</div>' +
             '</div>' +
@@ -972,6 +972,7 @@
         holder.setAttribute("data-type", type);
 
         document.getElementById("cdFlip").addEventListener("click", function () { flip(); });
+        if (window.OC_FLIPTIP) OC_FLIPTIP.attach(document.getElementById("cdFlip"), S.characterPage);   /* 뒤집기 안내 (addon.js) */
         if (type === "custom") sizeCustom(ch);
         renderDetail(ch, i);
 
@@ -1876,7 +1877,7 @@
       holder.innerHTML =
         '<div class="cd cd-' + type + (type === "id" ? " ow-card" : "") + (solo ? " cx-solo" : "") + '" style="--c:' + cardColor(O.color) + ';--c2:' + cardSub(O.subColor, O.color) + ';--ct:' + cardText(O.textColor, O.color) + ';--cx-r:' + ((O.customRadius != null) ? O.customRadius : 12) + 'px;--cx-size:' + OC_CARD.size(O) + '">' +
           (type === "id" && O.strap !== false ? '<div class="ow-strap"><span>' + (O.strap || "") + '</span></div><div class="ow-clip"></div>' : "") +
-          '<div class="cd-flip" id="cdFlip" title="눌러서 뒤집기">' +
+          '<div class="cd-flip" id="cdFlip">' +
             '<div class="cd-face cd-front">' + faceF + '</div>' +
             '<div class="cd-face cd-back">' + faceB + '</div>' +
           '</div>' +
@@ -1887,6 +1888,7 @@
         if (e.target.closest("a")) return;   // 링크 칩은 뒤집지 않고 링크로
         flip();
       });
+      if (window.OC_FLIPTIP) OC_FLIPTIP.attach(document.getElementById("cdFlip"), S.characterPage);   /* 뒤집기 안내 (addon.js) */
       renderDetail(O);
 
       addKey( function (e) {

@@ -71,3 +71,89 @@ window.OC_SD = (function () {
     }
   };
 })();
+
+/* ---------- 카드 뒤집기 안내 (디자인 말풍선) ----------
+   브라우저 기본 말풍선(title) 대신, 사이트 디자인에 맞춘 안내를 보여줘요.
+   · 마우스 : 카드 위에 올리면 커서를 부드럽게 따라다니는 알약 모양 안내
+   · 휴대폰 : 카드 아래 작은 'TAP TO FLIP' 표시 (한 번 뒤집으면 사라짐)
+   · 글자 : 캐릭터 페이지 설정의 flipText / flipBackText / flipTapText (비우면 기본)
+   ----------------------------------------- */
+window.OC_FLIPTIP = (function () {
+  var tip = null, label = null, raf = 0, on = false;
+  var x = 0, y = 0, tx = 0, ty = 0, texts = {};
+  var ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 0 1 13.7-5.6L20 8.7M20 4v4.7h-4.7M20 12a8 8 0 0 1-13.7 5.6L4 15.3M4 20v-4.7h4.7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  function make() {
+    if (tip) return;
+    tip = document.createElement("div");
+    tip.className = "oc-fliptip";
+    tip.setAttribute("aria-hidden", "true");
+    tip.innerHTML = '<i class="oc-fliptip-ic">' + ICON + '</i><b></b>';
+    label = tip.querySelector("b");
+    document.body.appendChild(tip);
+  }
+  function text() {
+    return document.body.classList.contains("is-flipped")
+      ? (texts.back || "FLIP BACK") : (texts.front || "CLICK TO FLIP");
+  }
+  function loop() {
+    /* 커서보다 살짝 늦게, 부드럽게 따라오기 */
+    x += (tx - x) * 0.28; y += (ty - y) * 0.28;
+    tip.style.translate = Math.round(x) + "px " + Math.round(y) + "px";
+    if (on && (Math.abs(tx - x) > .4 || Math.abs(ty - y) > .4)) raf = requestAnimationFrame(loop);
+    else raf = 0;
+  }
+  function aim(e) {
+    var w = tip.offsetWidth || 150, h = tip.offsetHeight || 34;
+    tx = Math.min(e.clientX + 18, window.innerWidth - w - 8);
+    ty = Math.min(e.clientY + 22, window.innerHeight - h - 8);
+    if (!raf) raf = requestAnimationFrame(loop);
+  }
+  function show(e) {
+    if (e.pointerType && e.pointerType !== "mouse") return;
+    label.textContent = text();
+    if (!on) { aim(e); x = tx; y = ty; tip.style.translate = Math.round(x) + "px " + Math.round(y) + "px"; }
+    on = true; tip.classList.add("is-on");
+  }
+  function hide() { on = false; if (tip) tip.classList.remove("is-on"); }
+
+  return {
+    attach: function (el, P) {
+      if (!el) return;
+      P = P || {};
+      texts = { front: P.flipText, back: P.flipBackText, tap: P.flipTapText };
+      el.removeAttribute("title");
+      var touch = window.matchMedia && matchMedia("(hover: none)").matches;
+      if (touch) {
+        /* 휴대폰 : 카드 아래 작은 표시 */
+        var cd = el.closest(".cd");
+        if (cd && !cd.querySelector(".oc-taptip")) {
+          var t = document.createElement("span");
+          t.className = "oc-taptip";
+          t.innerHTML = '<i class="oc-fliptip-ic">' + ICON + '</i>' + (texts.tap || "TAP TO FLIP");
+          cd.appendChild(t);
+          el.addEventListener("click", function () { t.classList.add("is-gone"); });
+        }
+        return;
+      }
+      make(); hide();
+      el.addEventListener("pointerenter", show);
+      el.addEventListener("pointermove", function (e) {
+        if (e.pointerType && e.pointerType !== "mouse") return;
+        /* 링크 칩 위에서는 숨겨요 (링크로 동작) */
+        if (e.target.closest && e.target.closest("a")) { hide(); return; }
+        if (!on) show(e);
+        aim(e);
+      });
+      el.addEventListener("pointerleave", hide);
+      el.addEventListener("click", function () {
+        /* 뒤집은 뒤 글자 바꾸기 + 살짝 튀는 효과 */
+        setTimeout(function () {
+          if (!label) return;
+          label.textContent = text();
+          tip.classList.remove("is-pop"); void tip.offsetWidth; tip.classList.add("is-pop");
+        }, 0);
+      });
+      window.addEventListener("hashchange", hide, { once: true });
+    }
+  };
+})();

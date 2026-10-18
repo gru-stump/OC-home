@@ -148,3 +148,76 @@ img.oc-crop {
 /* 3) 뒤집을 때 들어오는 대각선 배경 · 고정 배경 : 각자 따로 움직이게 */
 .ch-detail-bg { will-change: transform; }
 .bg-photo, .bg-overlay, .bg-grid, .bg-fade { will-change: transform; }
+
+
+/* ---------- 카드 뒤집기 안내 (addon.js 의 OC_FLIPTIP) ----------
+   메인 메뉴 막대와 같은 언어 : 꾸밈 색 바탕 + 마름모 아이콘 + 메뉴 글꼴
+   ----------------------------------------- */
+.oc-fliptip {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 60;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 16px 5px 7px;
+  border-radius: 999px;
+  background: var(--deco);
+  color: var(--bg);
+  box-shadow: 0 8px 20px rgba(0,0,0,.22);
+  font-family: var(--font-menu), var(--font-body), Impact, 'Arial Narrow', sans-serif;
+  font-size: 15px;
+  line-height: 1;
+  letter-spacing: 3px;
+  white-space: nowrap;
+  opacity: 0;
+  scale: .6;
+  transform-origin: 12px 50%;
+  transition: opacity .18s ease, scale .32s cubic-bezier(.3,1.6,.5,1);
+  will-change: translate;
+}
+.oc-fliptip.is-on { opacity: 1; scale: 1; }
+.oc-fliptip b { font-weight: 400; padding-top: 2px; }
+
+/* 마름모 아이콘 (메뉴 번호 마름모와 같은 모양) */
+.oc-fliptip-ic {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  rotate: 45deg;
+  background: var(--bg);
+  color: var(--deco);
+  border-radius: 3px;
+}
+.oc-fliptip-ic svg { width: 13px; height: 13px; rotate: -45deg; }
+.oc-fliptip.is-on .oc-fliptip-ic svg { animation: ocTipSpin .6s cubic-bezier(.4,.1,.2,1) .05s both; }
+.oc-fliptip.is-pop { animation: ocTipPop .35s cubic-bezier(.3,1.6,.5,1); }
+.oc-fliptip.is-pop .oc-fliptip-ic svg { animation: ocTipSpin .6s cubic-bezier(.4,.1,.2,1) both; }
+@keyframes ocTipSpin { from { rotate: -225deg; } to { rotate: -45deg; } }
+@keyframes ocTipPop { 40% { scale: 1.12; } }
+
+/* 휴대폰 : 카드 아래 작은 표시 */
+.oc-taptip {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 18px;
+  padding: 5px 14px 4px 6px;
+  border-radius: 999px;
+  background: var(--deco);
+  color: var(--bg);
+  font-family: var(--font-menu), var(--font-body), Impact, 'Arial Narrow', sans-serif;
+  font-size: 13px;
+  line-height: 1;
+  letter-spacing: 3px;
+  transition: opacity .3s, translate .3s;
+  animation: ocTapIn .5s .8s both;
+}
+.oc-taptip .oc-fliptip-ic { width: 18px; height: 18px; }
+.oc-taptip .oc-fliptip-ic svg { width: 11px; height: 11px; }
+.oc-taptip.is-gone { opacity: 0; translate: 0 -6px; pointer-events: none; }
+@keyframes ocTapIn { from { opacity: 0; translate: 0 8px; } }

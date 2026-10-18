@@ -31,7 +31,7 @@
     label: '라벨', imageTint: '대표색 입히기', tintStrength: '색 진하기(0~1)', idNotice: '학생증 뒷면 안내',
     idIssued: '발급일', idValid: '유효기간', ticketTerms: '티켓 약관', tabs: '탭 이름', galleryEmpty: '갤러리 비었을 때 글',
     relationEmpty: '관계 비었을 때 글', panelStrength: '상세 배경 진하기(0~1)', sdShow: 'SD 보이는 때',
-    sdSize: 'SD 크기', sdPos: 'SD 위치', sdX: 'SD 가로 미세조정', sdY: 'SD 세로 미세조정', wantedPaper: '수배지 종이 이미지',
+    flipText: '뒤집기 안내 글자', flipBackText: '되돌리기 안내 글자', flipTapText: '휴대폰 안내 글자', sdSize: 'SD 크기', sdPos: 'SD 위치', sdX: 'SD 가로 미세조정', sdY: 'SD 세로 미세조정', wantedPaper: '수배지 종이 이미지',
     color: '대표색', subColor: '보조색', textColor: '글자색', cardTitle: '카드 큰 글자', cardSub: '카드 작은 글자',
     sd: 'SD 이미지', tile: '타일 이미지', tilePosition: '타일 사진 위치', name: '이름', nameEn: '영문 이름 / 직책',
     intro: '한 줄 소개', tags: '태그', seat: '좌석', gate: '입구', row: '열', number: '카드 번호',
@@ -534,6 +534,7 @@
 
   /* 칸이 없는 항목을 나중에 다시 꺼내 쓰는 "+ 항목 추가" 목록 */
   var OPTIONAL = {
+    characterPage: { flipText: 'CLICK TO FLIP', flipBackText: 'FLIP BACK', flipTapText: 'TAP TO FLIP' },
     artworks: { bg: '' },
     characters: { pairImage: '', sdSize: 230, subColor: '', textColor: '', seat: { gate: 'A', row: '01', seat: '01' },
                   customFront: '', customBack: '', customRatio: '', customSize: 100, customRadius: 12 }
