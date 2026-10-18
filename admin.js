@@ -88,6 +88,7 @@
     'galleryPage.menuTitle': '메인 메뉴 이름', 'galleryPage.menuDesc': '메인 메뉴 설명', 'galleryPage.menuIcon': '메인 메뉴 아이콘', 'storyPage.menu': '메인 메뉴에 자동으로 붙이기 (편집기 메인 메뉴로 옮긴 뒤엔 꺼져요)',
     'storyPage.menuTitle': '메인 메뉴 이름', 'storyPage.menuDesc': '메인 메뉴 설명', 'storyPage.menuIcon': '메인 메뉴 아이콘'
   };
+  LABEL_IN['stories.hoverColor'] = '이 카드만 강조색 (비우면 페이지 설정)';
   function labelOf(k, key) { return LABEL_IN[key + '.' + k] || LABEL[k] || k; }
   var LONG_KEYS = { text: 1, desc: 1, intro: 1, about: 1, story: 1, review: 1, idNotice: 1, backNotice: 1, code: 1, message: 1, note: 1, comment: 1 };
   /* 이미지 칸 : [올리기] 버튼이 붙어요 */
@@ -536,6 +537,7 @@
   var OPTIONAL = {
     characterPage: { flipText: 'CLICK TO FLIP', flipBackText: 'FLIP BACK', flipTapText: 'TAP TO FLIP' },
     artworks: { bg: '' },
+    stories: { hoverColor: '' },
     characters: { pairImage: '', sdSize: 230, subColor: '', textColor: '', seat: { gate: 'A', row: '01', seat: '01' },
                   customFront: '', customBack: '', customRatio: '', customSize: 100, customRadius: 12 }
   };
@@ -698,6 +700,8 @@
       box.innerHTML = '';
       var cardObj = (key === 'characters' || key === 'owner') && 'type' in obj;
       if (cardObj && obj.type === 'custom') ensureCustom(obj);
+      /* 스토리 페이지 색 칸 : 예전에 저장한 설정에 없던 칸도 항상 보이게 (값은 그대로) */
+      if (key === 'storyPage') ensureAfter(obj, 'pointColor', { lineColor: '', hoverColor: '', cardOpacity: 85 });
       if ((key === 'characters' || key === 'owner') && 'sd' in obj) ensureAfter(obj, 'sd', { sdSize: '', sdPos: '', sdX: '', sdY: '' });
       if (key === 'characterPage' && 'sdShow' in obj) ensureAfter(obj, 'sdSize' in obj ? 'sdSize' : 'sdShow',
         'sdSize' in obj ? { sdPos: 'rb', sdX: 0, sdY: 0 } : { sdSize: 230, sdPos: 'rb', sdX: 0, sdY: 0 });
@@ -729,7 +733,7 @@
         if (missing.length) {
           var sel = h('select', { class: 'oha-in', style: 'width:auto;display:inline-block' },
             [h('option', { value: '', text: '+ 항목 추가…' })].concat(missing.map(function (k) {
-              return h('option', { value: k, text: LABEL[k] || k });
+              return h('option', { value: k, text: labelOf(k, key) });
             })));
           sel.onchange = function () {
             if (!sel.value) return;

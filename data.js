@@ -991,6 +991,7 @@ const SITE = {
                  한 줄에 ― 또는 --- 만 쓰면 장면 전환 표시가 돼요.
                  여기서는 줄바꿈을 쓰려고 " " 대신 ` ` (백틱)으로 감쌌어요.
        gallery : 읽기 화면 아래 이미지 모음 [{ image: "주소", caption: "설명" }, …]
+       hoverColor : 이 카드만 마우스 올렸을 때 강조색 (테두리 · 날짜 칸 · 제목 밑줄). 비우면 storyPage.hoverColor
   */
   storyPage: {
     menu: true,               // 메인 메뉴에 Timeline 자동으로 붙이기 (편집기를 열면 메인 메뉴 목록으로 옮겨지고 false 가 돼요)

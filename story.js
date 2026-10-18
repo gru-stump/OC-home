@@ -73,7 +73,9 @@ window.OC_STORY = (function () {
       '<ol class="st-line">' + list.map(function (x, n) {
         return '<li class="st-item ' + (n % 2 ? "is-right" : "is-left") + '" style="--n:' + n + '">' +
           '<i class="st-dot" aria-hidden="true"></i>' +
-          '<button class="st-card' + (x.image ? "" : " no-img") + '" type="button" data-n="' + n + '">' +
+          '<button class="st-card' + (x.image ? "" : " no-img") + '" type="button" data-n="' + n + '"' +
+            /* 이 카드만 강조색 (비우면 페이지 설정 hoverColor) */
+            (/^#[0-9a-f]{3,8}$|^rgba?\(|^hsla?\(/i.test(x.hoverColor || "") ? ' style="--st-hover:' + x.hoverColor + '"' : "") + '>' +
             (x.image ? '<span class="st-img"><img src="' + attr(x.image) + '" alt="" loading="lazy"' + crop(x) + '></span>' : "") +
             '<span class="st-body">' +
               (x.date ? '<span class="st-date">' + x.date + '</span>' : "") +
