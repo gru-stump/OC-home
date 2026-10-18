@@ -22,6 +22,8 @@
   <!-- 갤러리 페이지(#gallery) -->
   <script src="gallery.js"></script>
   <script src="site.config.js"></script>
+  <!-- 방문 통계 (숫자만 세요 · 편집기 '방문 통계'에서 확인) -->
+  <script src="stats.js" defer></script>
 
   <!-- 연결 설정(site.config.js) 적용 + 편집기에서 저장한 설정(Firestore site/config) 불러오기 -->
   <script>
@@ -2287,7 +2289,7 @@
       var v = view(); if (!v) return;
       if (window.OHAdmin) return window.OHAdmin.mount(v);
       var s = document.createElement('script');
-      s.src = 'admin.js?v=3';
+      s.src = 'admin.js?v=4';
       s.onload = function () { window.OHAdmin.mount(v); };
       document.body.appendChild(s);
     }

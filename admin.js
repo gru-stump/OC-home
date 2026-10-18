@@ -227,7 +227,9 @@
   }
   function adminEmail() { return ((S.admin || {}).email || '').trim().toLowerCase(); }
   function isAdmin() {
-    return !!(st.user && adminEmail() && (st.user.email || '').toLowerCase() === adminEmail());
+    var ok = !!(st.user && adminEmail() && (st.user.email || '').toLowerCase() === adminEmail());
+    if (ok && window.OC_STATS) OC_STATS.meDefault();   /* 관리자 기기는 통계에서 빼기 (방문 통계 탭에서 바꿀 수 있어요) */
+    return ok;
   }
 
   /* ---------- 스타일 ---------- */
@@ -281,6 +283,33 @@
       '.oha-gb{border:1px solid #e2e2e2;border-radius:10px;padding:10px 12px;margin:8px 0;background:#fff}' +
       '.oha-gb.is-secret{background:#fff7f5;border-color:#efc9c3}.oha-gb small{color:#777}' +
       '.oha-tag{display:inline-block;background:#b3261e;color:#fff;border-radius:999px;padding:1px 8px;font-size:11px;margin-left:6px}' +
+      /* 방문 통계 */
+      '.ost-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:10px 0 16px}' +
+      '.ost-card{background:#fff;border:1px solid #e2e2e2;border-radius:12px;padding:10px 14px}' +
+      '.ost-card small{display:block;color:#777;font-size:12px}.ost-card b{font-size:24px;line-height:1.3}' +
+      '.ost-card em{display:block;font-style:normal;color:#999;font-size:12px}' +
+      '.ost-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:6px 0}' +
+      '.ost-bar .oha-btn.is-on{background:' + point + ';border-color:' + point + ';color:#fff}' +
+      '.ost-chart{background:#fff;border:1px solid #e2e2e2;border-radius:12px;padding:12px 12px 6px;margin:8px 0 6px}' +
+      '.ost-chart h3{margin:0 0 2px;font-size:15px}.ost-chart svg{display:block;width:100%;height:auto;overflow:visible}' +
+      '.ost-chart .b1{fill:' + point + '}.ost-chart .b2{fill:#fff;opacity:.5}.ost-chart .hit{fill:transparent;cursor:default}' +
+      '.ost-chart .hit:hover{fill:rgba(0,0,0,.05)}.ost-chart .ax{fill:#999;font-size:11px}.ost-chart .gl{stroke:#eee}' +
+      '.ost-chart .vl{fill:#555;font-size:10px;text-anchor:middle}' +
+      '.ost-read{min-height:20px;font-size:13px;color:#444;margin:4px 2px 0}' +
+      '.ost-key{display:flex;gap:14px;font-size:12px;color:#666;margin:2px 0 6px}.ost-key i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px;background:' + point + '}.ost-key i.k2{background-image:linear-gradient(rgba(255,255,255,.5),rgba(255,255,255,.5))}' +
+      '.ost-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-top:12px}' +
+      '.ost-rank{background:#fff;border:1px solid #e2e2e2;border-radius:12px;padding:10px 12px}' +
+      '.ost-rank h3{margin:0 0 6px;font-size:15px}.ost-rank ol{list-style:none;margin:0;padding:0}' +
+      '.ost-row{display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:8px;padding:6px 4px;border-radius:8px;cursor:pointer;border:0;background:none;width:100%;text-align:left;font:inherit;color:inherit}' +
+      '.ost-row:hover{background:#f3f3f3}.ost-row.is-on{background:#f0f0f0;outline:1.5px solid ' + point + '}' +
+      '.ost-row .no{color:#999;font-weight:700;font-size:12px;text-align:center}' +
+      '.ost-row .nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
+      '.ost-row .nm img{width:28px;height:28px;object-fit:cover;border-radius:6px;vertical-align:middle;margin-right:8px;background:#eee}' +
+      '.ost-row .gauge{grid-column:2/4;height:4px;border-radius:4px;background:#eee;overflow:hidden;margin-top:-2px}' +
+      '.ost-row .gauge i{display:block;height:100%;background:' + point + '}' +
+      '.ost-row .ct{font-weight:700;font-variant-numeric:tabular-nums}.ost-row .ct small{font-weight:400;color:#888;margin-left:6px}' +
+      '.ost-empty{color:#999;font-size:13px;padding:6px 4px}' +
+      '.oha-panel{min-width:0}.ost-pre{white-space:pre;overflow:auto;max-height:340px;font-size:12px}' +
       '@media(max-width:760px){.oha-main{grid-template-columns:1fr}.oha-nav{position:static;flex-direction:row;flex-wrap:wrap}.oha-row{grid-template-columns:1fr}}';
     document.head.appendChild(h('style', { id: 'oha-css', text: css }));
   }
@@ -827,6 +856,7 @@
       [].forEach.call(nav.children, function (b) { b.classList.toggle('is-on', b.dataset.k === st.tab); });
       panel.innerHTML = '';
       if (st.tab === '__gb') return renderGuestbook(panel);
+      if (st.tab === '__st') return renderStats(panel);
       panel.appendChild(h('h2', { text: TAB_NAME[st.tab] || st.tab }));
       var v = st.draft[st.tab];
       var ed = valueEd(v, function (nv) { st.draft[st.tab] = nv; }, st.tab, '');
@@ -836,8 +866,8 @@
       }
       panel.appendChild(ed);
     }
-    keys.concat(['__gb']).forEach(function (k) {
-      var b = h('button', { type: 'button', text: k === '__gb' ? '방명록 관리' : (TAB_NAME[k] || k) });
+    keys.concat(['__gb', '__st']).forEach(function (k) {
+      var b = h('button', { type: 'button', text: k === '__gb' ? '방명록 관리' : k === '__st' ? '방문 통계' : (TAB_NAME[k] || k) });
       b.dataset.k = k; b.onclick = function () {
         st.tab = k; show();
         if (st.preview) setRoute(TAB_ROUTE[k] || '');
@@ -891,6 +921,221 @@
       list.innerHTML = '';
       list.appendChild(h('p', { text: '불러오지 못했어요: ' + (e.message || e) }));
     });
+  }
+
+  /* ---------- 방문 통계 ----------
+     stats.js 가 하루에 문서 1개(stats/d2026-10-18)에 숫자만 +1 해 둔 것을 모아서 보여줘요.
+     ----------------------------------------- */
+  var STATS_RULES =
+    "    // 방문 통계 (stats.js) : 방문자는 숫자 한 칸을 +1 하는 것만, 읽기는 관리자만\n" +
+    "    function statKey(k) {\n" +
+    "      return k.matches('^(v|n|p_[a-z]{1,16}|s_[a-z0-9]{1,10}|sr_[a-z0-9]{1,10}|g_[a-z0-9]{1,10})$');\n" +
+    "    }\n" +
+    "    match /stats/{day} {\n" +
+    "      allow read, delete: if isAdmin();\n" +
+    "      allow create: if day.matches('^d[0-9]{4}-[0-9]{2}-[0-9]{2}$')\n" +
+    "        && request.resource.data.keys().size() == 1\n" +
+    "        && statKey(request.resource.data.keys()[0])\n" +
+    "        && request.resource.data[request.resource.data.keys()[0]] == 1;\n" +
+    "      allow update: if request.resource.data.diff(resource.data).affectedKeys().size() == 1\n" +
+    "        && statKey(request.resource.data.diff(resource.data).affectedKeys().toList()[0])\n" +
+    "        && request.resource.data[request.resource.data.diff(resource.data).affectedKeys().toList()[0]]\n" +
+    "           == resource.data.get(request.resource.data.diff(resource.data).affectedKeys().toList()[0], 0) + 1;\n" +
+    "    }\n";
+
+  function renderStats(panel) {
+    panel.appendChild(h('h2', { text: '방문 통계' }));
+    panel.appendChild(h('p', { class: 'oha-note', text: '한국 시간 기준이에요. 같은 기기에서 같은 날 여러 번 봐도 1번으로 세요. 이름·IP 같은 개인정보는 저장하지 않아요.' }));
+
+    /* 이 기기 제외 */
+    if (window.OC_STATS) {
+      var me = h('input', { type: 'checkbox' });
+      me.checked = OC_STATS.me();
+      me.onchange = function () { OC_STATS.me(me.checked); toast(me.checked ? '이 기기는 이제 세지 않아요.' : '이 기기도 다시 세요.'); };
+      panel.appendChild(h('label', { class: 'oha-note', style: 'display:flex;align-items:center;gap:6px;margin:4px 0 10px' },
+        [me, h('span', { text: '내 기기(이 브라우저)에서 본 건 통계에 넣지 않기' })]));
+    }
+
+    var out = h('div', null, [h('p', { text: '불러오는 중…' })]);
+    panel.appendChild(out);
+
+    var code = (window.OC_STATS && OC_STATS.code) || function (t) {
+      t = String(t == null ? '' : t).trim(); var x = 5381;
+      for (var i = 0; i < t.length; i++) x = ((x << 5) + x + t.charCodeAt(i)) >>> 0;
+      return x.toString(36);
+    };
+    var today = (window.OC_STATS && OC_STATS.today) ? OC_STATS.today() : new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
+
+    /* 이름표 : 코드 → 제목 */
+    var src = st.draft || S;
+    var NAMES = {};
+    var MENU = { home: '메인', character: '캐릭터', pair: '페어', owner: '오너', guest: '방명록', story: '스토리', gallery: '갤러리' };
+    Object.keys(MENU).forEach(function (r) { NAMES['p_' + r] = { name: MENU[r] }; });
+    (src.stories || []).forEach(function (x) {
+      if (!x || !x.title) return;
+      var c = code(x.title);
+      NAMES['s_' + c] = { name: x.title, img: x.image };
+      NAMES['sr_' + c] = { name: x.title };
+    });
+    (src.artworks || []).forEach(function (x) {
+      var t = x && (x.title || x.image); if (!t) return;
+      NAMES['g_' + code(t)] = { name: x.title || '(제목 없는 그림)', img: x.image };
+    });
+    function nameOf(k) { return (NAMES[k] && NAMES[k].name) || '(지금은 없는 항목)'; }
+
+    function addDays(d, n) { var t = new Date(d + 'T00:00:00Z'); t.setUTCDate(t.getUTCDate() + n); return t.toISOString().slice(0, 10); }
+    var WEEK = ['일', '월', '화', '수', '목', '금', '토'];
+    function label(d) { var t = new Date(d + 'T00:00:00Z'); return (t.getUTCMonth() + 1) + '/' + t.getUTCDate() + ' (' + WEEK[t.getUTCDay()] + ')'; }
+    function fmt(n) { return Number(n || 0).toLocaleString('ko-KR'); }
+
+    fb().then(function (c) {
+      return c.fs.getDocs(c.fs.collection(c.db, 'stats'));
+    }).then(function (snap) {
+      var DAYS = {};
+      snap.forEach(function (d) { if (/^d\d{4}-\d\d-\d\d$/.test(d.id)) DAYS[d.id.slice(1)] = d.data(); });
+      draw(DAYS);
+    }).catch(function (e) {
+      out.innerHTML = '';
+      var perm = /permission|insufficient/i.test(String(e && (e.code || e.message)));
+      if (!perm) return out.appendChild(h('p', { text: '불러오지 못했어요: ' + (e.message || e) }));
+      var rules = firestoreRules(adminEmail());
+      var pre = h('pre', { class: 'oha-box ost-pre', text: rules });
+      var cp = h('button', { class: 'oha-btn is-main', type: 'button', text: '새 규칙 전체 복사' });
+      cp.onclick = function () { navigator.clipboard.writeText(rules).then(function () { toast('복사했어요. Firebase 규칙 탭에 붙여넣어 주세요.'); }); };
+      out.appendChild(h('div', { class: 'oha-box' }, [
+        h('b', { text: 'Firebase 규칙에 통계 부분이 아직 없어요.' }),
+        h('p', { class: 'oha-note', text: 'Firebase 콘솔 → Firestore Database → 규칙 탭 → 안에 있는 글을 전부 지우고, 아래 [새 규칙 전체 복사]로 복사한 내용을 붙여넣은 뒤 [게시]를 눌러 주세요. (방명록·사이트 설정 규칙도 그대로 들어 있어요) 그다음부터 숫자가 쌓여요.' }),
+        cp, h('details', null, [h('summary', { text: '규칙 내용 보기' }), pre])]));
+    });
+
+    var range = 30, pick = null;   /* pick : 그래프로 볼 항목 (null = 방문자) */
+
+    function draw(DAYS) {
+      out.innerHTML = '';
+      var all = Object.keys(DAYS).sort();
+      var first = all[0] || today;
+
+      function sum(from, key) {
+        var t = 0; Object.keys(DAYS).forEach(function (d) { if (d >= from) t += +(DAYS[d][key] || 0); }); return t;
+      }
+      /* 요약 */
+      out.appendChild(h('div', { class: 'ost-cards' }, [
+        ['오늘 방문', sum(today, 'v')],
+        ['최근 7일', sum(addDays(today, -6), 'v')],
+        ['최근 30일', sum(addDays(today, -29), 'v')],
+        ['전체', sum('', 'v'), '처음 온 사람 ' + fmt(sum('', 'n'))]
+      ].map(function (r) {
+        return h('div', { class: 'ost-card' }, [h('small', { text: r[0] }), h('b', { text: fmt(r[1]) }), r[2] ? h('em', { text: r[2] }) : null]);
+      })));
+      if (!all.length) out.appendChild(h('p', { class: 'oha-note', text: '아직 쌓인 기록이 없어요. 사이트에 누가 들어오면 여기부터 숫자가 생겨요.' }));
+
+      /* 기간 */
+      var bar = h('div', { class: 'ost-bar' }, [h('span', { class: 'oha-note', text: '기간' })]);
+      [[7, '7일'], [30, '30일'], [90, '90일'], [0, '전체']].forEach(function (r) {
+        var b = h('button', { class: 'oha-btn' + (range === r[0] ? ' is-on' : ''), type: 'button', text: r[1] });
+        b.onclick = function () { range = r[0]; draw(DAYS); };
+        bar.appendChild(b);
+      });
+      out.appendChild(bar);
+
+      var from = range ? addDays(today, -(range - 1)) : (first < today ? first : today);
+      var days = []; for (var d = from; d <= today; d = addDays(d, 1)) days.push(d);
+
+      /* 그래프 */
+      var k1 = 'v', k2 = 'n', t1 = '방문자', t2 = '처음 온 사람', title = '날짜별 방문자';
+      if (pick) {
+        title = nameOf(pick);
+        if (pick.indexOf('s_') === 0) { k1 = pick; k2 = 'sr_' + pick.slice(2); t1 = '열어 본 사람'; t2 = '끝까지 읽은 사람'; }
+        else { k1 = pick; k2 = ''; t1 = pick.indexOf('g_') === 0 ? '크게 본 사람' : '들어간 사람'; }
+      }
+      out.appendChild(chart(days, DAYS, k1, k2, t1, t2, title));
+
+      /* 순위 */
+      function rank(prefix) {
+        var t = {};
+        days.forEach(function (d) {
+          var o = DAYS[d]; if (!o) return;
+          Object.keys(o).forEach(function (k) { if (k.indexOf(prefix) === 0) t[k] = (t[k] || 0) + (+o[k] || 0); });
+        });
+        return Object.keys(t).map(function (k) { return [k, t[k]]; }).sort(function (a, b) { return b[1] - a[1]; });
+      }
+      function list(head, prefix, extra) {
+        var rows = rank(prefix), max = rows.length ? rows[0][1] : 1;
+        var ol = h('ol');
+        if (!rows.length) ol.appendChild(h('li', { class: 'ost-empty', text: '이 기간에는 기록이 없어요.' }));
+        rows.slice(0, 15).forEach(function (r, i) {
+          var info = NAMES[r[0]] || {};
+          var nm = h('span', { class: 'nm' }, [info.img ? h('img', { src: info.img, alt: '', loading: 'lazy' }) : null, document.createTextNode(nameOf(r[0]))]);
+          var ct = h('span', { class: 'ct', text: fmt(r[1]) }, extra ? [h('small', { text: extra(r[0], r[1]) })] : null);
+          var btn = h('button', { class: 'ost-row' + (pick === r[0] ? ' is-on' : ''), type: 'button', title: '날짜별 그래프로 보기' }, [
+            h('span', { class: 'no', text: String(i + 1) }), nm, ct,
+            h('span', { class: 'gauge' }, [h('i', { style: 'width:' + Math.max(3, r[1] / max * 100) + '%' })])]);
+          btn.onclick = function () { pick = pick === r[0] ? null : r[0]; draw(DAYS); out.querySelector('.ost-chart').scrollIntoView({ behavior: 'smooth', block: 'center' }); };
+          ol.appendChild(h('li', null, [btn]));
+        });
+        return h('div', { class: 'ost-rank' }, [h('h3', { text: head }), ol]);
+      }
+      var readCount = {};
+      rank('sr_').forEach(function (r) { readCount[r[0].slice(3)] = r[1]; });
+      out.appendChild(h('div', { class: 'ost-grid' }, [
+        list('많이 본 스토리', 's_', function (k, n) {
+          var r = readCount[k.slice(2)] || 0;
+          return '끝까지 ' + fmt(r) + ' · ' + Math.round(r / Math.max(n, 1) * 100) + '%';
+        }),
+        list('많이 본 그림', 'g_'),
+        list('많이 들어간 메뉴', 'p_')
+      ]));
+      out.appendChild(h('p', { class: 'oha-note', style: 'margin-top:10px', text: '항목을 누르면 위 그래프가 그 항목의 날짜별 숫자로 바뀌어요. 한 번 더 누르면 방문자 그래프로 돌아가요. ' +
+        '‘끝까지’는 스토리 본문 맨 끝까지 내려간 사람 수예요. 제목을 바꾸면 새 항목으로 따로 세져요.' }));
+    }
+
+    /* 막대그래프 (SVG) */
+    function chart(days, DAYS, k1, k2, t1, t2, title) {
+      var W = Math.max(300, Math.round((out.clientWidth || 720) - 26)), H = 210, L = 30, R = 6, T = 16, B = 26;
+      var v1 = days.map(function (d) { return +((DAYS[d] || {})[k1] || 0); });
+      var v2 = days.map(function (d) { return k2 ? +((DAYS[d] || {})[k2] || 0) : 0; });
+      var mx = Math.max.apply(null, v1.concat(v2, [1]));
+      var step = mx <= 5 ? 1 : Math.pow(10, Math.floor(Math.log10(mx / 4)));
+      [1, 2, 5, 10].some(function (m) { if (mx / (step * m) <= 5) { step *= m; return true; } });
+      var top = Math.ceil(mx / step) * step;
+      var n = days.length, cw = (W - L - R) / n, bw = Math.max(1.5, Math.min(26, cw * .7));
+      var y = function (v) { return T + (H - T - B) * (1 - v / top); };
+      var p = [];
+      for (var g = 0; g <= top; g += step) {
+        p.push('<line class="gl" x1="' + L + '" x2="' + (W - R) + '" y1="' + y(g) + '" y2="' + y(g) + '"/>');
+        p.push('<text class="ax" x="' + (L - 6) + '" y="' + (y(g) + 4) + '" text-anchor="end">' + g + '</text>');
+      }
+      var every = Math.ceil(n / Math.max(3, Math.floor((W - L - R) / 46)));
+      days.forEach(function (d, i) {
+        var cx = L + cw * i + cw / 2;
+        p.push('<rect class="b1" x="' + (cx - bw / 2) + '" y="' + y(v1[i]) + '" width="' + bw + '" height="' + (y(0) - y(v1[i])) + '" rx="' + Math.min(3, bw / 3) + '"/>');
+        if (k2 && v2[i]) p.push('<rect class="b2" x="' + (cx - bw / 2) + '" y="' + y(v2[i]) + '" width="' + bw + '" height="' + (y(0) - y(v2[i])) + '"/>');
+        if (n <= 14 && v1[i]) p.push('<text class="vl" x="' + cx + '" y="' + (y(v1[i]) - 4) + '">' + v1[i] + '</text>');
+        if (i % every === 0 || i === n - 1) {
+          var t = new Date(d + 'T00:00:00Z');
+          p.push('<text class="ax" x="' + cx + '" y="' + (H - 8) + '" text-anchor="middle">' + (t.getUTCMonth() + 1) + '/' + t.getUTCDate() + '</text>');
+        }
+        p.push('<rect class="hit" data-i="' + i + '" x="' + (L + cw * i) + '" y="' + T + '" width="' + cw + '" height="' + (H - T - B) + '"/>');
+      });
+      var box = h('div', { class: 'ost-chart' });
+      box.appendChild(h('h3', { text: title }));
+      box.appendChild(h('div', { class: 'ost-key' }, [
+        h('span', null, [h('i'), document.createTextNode(t1)]),
+        k2 ? h('span', null, [h('i', { class: 'k2' }), document.createTextNode(t2)]) : null]));
+      var holder = h('div'); holder.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + title.replace(/"/g, '') + ' 그래프">' + p.join('') + '</svg>';
+      box.appendChild(holder);
+      var sum1 = v1.reduce(function (a, b) { return a + b; }, 0), sum2 = v2.reduce(function (a, b) { return a + b; }, 0);
+      var idle = '이 기간 ' + t1 + ' ' + fmt(sum1) + (k2 ? ' · ' + t2 + ' ' + fmt(sum2) : '') + '  ·  막대에 마우스를 올리면 그날 숫자가 보여요';
+      var read = h('p', { class: 'ost-read', text: idle });
+      box.appendChild(read);
+      holder.querySelectorAll('.hit').forEach(function (r) {
+        var i = +r.getAttribute('data-i');
+        r.addEventListener('mouseenter', function () { read.textContent = label(days[i]) + '  ·  ' + t1 + ' ' + fmt(v1[i]) + (k2 ? '  ·  ' + t2 + ' ' + fmt(v2[i]) : ''); });
+        r.addEventListener('click', function () { read.textContent = label(days[i]) + '  ·  ' + t1 + ' ' + fmt(v1[i]) + (k2 ? '  ·  ' + t2 + ' ' + fmt(v2[i]) : ''); });
+      });
+      holder.addEventListener('mouseleave', function () { read.textContent = idle; });
+      return box;
+    }
   }
 
   /* ---------- 저장 / 되돌리기 ---------- */
@@ -1006,7 +1251,8 @@
       "        && request.resource.data.message is string\n        && request.resource.data.message.size() > 0\n        && request.resource.data.message.size() <= 1000\n" +
       "        && request.resource.data.secret is bool\n        && request.resource.data.createdAt == request.time;\n" +
       "      allow read: if resource.data.secret == false || isAdmin();\n      allow update, delete: if isAdmin();\n    }\n\n" +
-      "    // 사이트 설정 (편집기가 저장하는 곳)\n    match /site/{docId} {\n      allow read: if true;\n      allow write: if isAdmin();\n    }\n  }\n}\n";
+      "    // 사이트 설정 (편집기가 저장하는 곳)\n    match /site/{docId} {\n      allow read: if true;\n      allow write: if isAdmin();\n    }\n\n" +
+      STATS_RULES + "  }\n}\n";
   }
   function storageRules(email) {
     return "rules_version = '2';\nservice firebase.storage {\n  match /b/{bucket}/o {\n    match /uploads/{allPaths=**} {\n      allow read: if true;\n" +

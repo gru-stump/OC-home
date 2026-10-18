@@ -269,6 +269,7 @@
 .sr-text p { margin: 0 0 1.35em; }
 .sr-text p:last-child { margin-bottom: 0; }
 .sr-text p.sr-gap { margin-top: 2.6em; }   /* 본문의 빈 줄 = 한 줄 더 띄기 */
+.sr-endmark { display: block; height: 1px; }   /* 통계 : 본문 끝 표시 (보이지 않아요) */
 .sr-break { display: flex; justify-content: center; gap: 12px; margin: 2.6em 0 !important; }
 .sr-break i { width: 5px; height: 5px; border-radius: 50%; background: var(--st-point); opacity: .7; }
 .sr-blank { margin-top: 56px; padding: 50px 0; text-align: center; font-size: 14px; opacity: .5; border-top: 1px solid color-mix(in srgb, #fff 12%, transparent); }

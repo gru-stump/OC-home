@@ -184,6 +184,7 @@ window.OC_GALLERY = (function () {
       vw.classList.remove("swap"); void vw.offsetWidth; vw.classList.add("swap");
       vw.classList.add("open");
       document.body.classList.add("gl-viewing");
+      if (window.OC_STATS) OC_STATS.art(cur.x);   /* 통계 : 그림 크게 보기 1번 */
     }
     /* 묶음 안에서 먼저 넘기고, 끝이면 다음(이전) 그림으로 */
     function step(d) {

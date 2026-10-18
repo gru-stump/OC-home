@@ -165,7 +165,7 @@ window.OC_STORY = (function () {
             (x.pov ? '<p class="sr-pov">' + x.pov + '</p>' : "") +
           '</header>' +
           (x.body
-            ? '<div class="sr-text">' + paragraphs(x.body) + '</div>'
+            ? '<div class="sr-text">' + paragraphs(x.body) + '</div><i class="sr-endmark" aria-hidden="true"></i>'
             : '<p class="sr-blank">' + (P.bodyEmpty || "아직 쓰이지 않은 이야기예요.") + '</p>') +
           (g.length
             ? '<section class="sr-gallery">' +
@@ -189,12 +189,34 @@ window.OC_STORY = (function () {
         b.addEventListener("click", function () { openBox(g, +b.getAttribute("data-k")); });
       });
       rd.scrollTop = 0;
+      watchEnd(x);
+    }
+
+    /* ----- 통계 : 본문 끝까지 내려가면 '끝까지 읽음' 1번 (stats.js) -----
+       열고 5초 안에 끝이 보이는 건(빨리 넘긴 경우) 세지 않아요. */
+    let endIO = null;
+    function watchEnd(x) {
+      if (endIO) { endIO.disconnect(); endIO = null; }
+      const mark = rd.querySelector(".sr-endmark");
+      if (!mark || !window.OC_STATS || !("IntersectionObserver" in window)) return;
+      const t0 = Date.now();
+      let tm = 0;
+      endIO = new IntersectionObserver(function (es) {
+        const on = es.some(function (e) { return e.isIntersecting; });
+        clearTimeout(tm);
+        if (!on) return;
+        const done = function () { OC_STATS.read(x.title); if (endIO) { endIO.disconnect(); endIO = null; } };
+        const wait = 5000 - (Date.now() - t0);
+        if (wait <= 0) done(); else tm = setTimeout(function () { if (rd.classList.contains("open")) done(); }, wait);
+      }, { root: rd, threshold: 0 });
+      endIO.observe(mark);
     }
 
     function open(i) {
       if (!list[i]) return;
       cur = i;
       render();
+      if (window.OC_STATS) OC_STATS.story(list[i].title);
       rd.classList.remove("swap"); void rd.offsetWidth; rd.classList.add("swap");
       rd.classList.add("open");
       document.body.classList.add("st-reading");
