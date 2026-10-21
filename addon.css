@@ -221,3 +221,98 @@ img.oc-crop {
 .oc-taptip .oc-fliptip-ic svg { width: 11px; height: 11px; }
 .oc-taptip.is-gone { opacity: 0; translate: 0 -6px; pointer-events: none; }
 @keyframes ocTapIn { from { opacity: 0; translate: 0 8px; } }
+
+
+/* ---------- 캐릭터 배경음악 플레이어 (bgm.js 의 OC_BGM) ----------
+   캐릭터 소개 왼쪽 아래 작은 막대. 메뉴 막대와 같은 색 · 글꼴.
+   ----------------------------------------- */
+.oc-bgm {
+  position: fixed;
+  left: 24px;
+  bottom: 22px;
+  z-index: 55;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: min(360px, calc(100vw - 48px));
+  padding: 5px 6px 5px 5px;
+  border-radius: 999px;
+  background: var(--deco);
+  color: var(--bg);
+  box-shadow: 0 8px 22px rgba(0,0,0,.22);
+  font-family: var(--font-menu), var(--font-body), sans-serif;
+  opacity: 0;
+  translate: 0 12px;
+  pointer-events: none;
+  transition: opacity .35s, translate .35s;
+}
+.oc-bgm.is-on { opacity: 1; translate: 0 0; pointer-events: auto; }
+/* 유튜브 화면은 작은 원형 앨범처럼 */
+.oc-bgm-art {
+  position: relative;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #000;
+  margin-right: 6px;
+}
+.oc-bgm-art iframe {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 64px !important;
+  height: 36px !important;
+  translate: -50% -50%;
+  pointer-events: none;
+}
+.oc-bgm.is-playing .oc-bgm-art { animation: ocBgmSpin 6s linear infinite; }
+@keyframes ocBgmSpin { to { rotate: 360deg; } }
+.oc-bgm-info { min-width: 0; display: flex; flex-direction: column; line-height: 1.15; padding-right: 6px; }
+.oc-bgm-info small { font-size: 9px; letter-spacing: 2px; opacity: .6; }
+.oc-bgm-title {
+  font-weight: 400;
+  font-size: 12px;
+  letter-spacing: .5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 190px;
+}
+.oc-bgm-btn {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.oc-bgm-btn:hover { background: rgba(255,255,255,.14); }
+.oc-bgm-btn svg { width: 16px; height: 16px; }
+.oc-bgm-btn[hidden] { display: none; }
+.oc-bgm-mute.is-off { opacity: .55; }
+/* 브라우저가 자동 재생을 막았을 때 */
+.oc-bgm-tap {
+  display: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 1px;
+  padding: 0 10px 0 2px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.oc-bgm.is-blocked .oc-bgm-tap { display: block; }
+.oc-bgm.is-blocked .oc-bgm-info,
+.oc-bgm.is-blocked .oc-bgm-btn { display: none; }
+@media (max-width: 768px) {
+  .oc-bgm { left: 12px; bottom: 12px; }
+  .oc-bgm-title { max-width: 120px; }
+}

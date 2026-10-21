@@ -31,7 +31,7 @@
     label: '라벨', imageTint: '대표색 입히기', tintStrength: '색 진하기(0~1)', idNotice: '학생증 뒷면 안내',
     idIssued: '발급일', idValid: '유효기간', ticketTerms: '티켓 약관', tabs: '탭 이름', galleryEmpty: '갤러리 비었을 때 글',
     relationEmpty: '관계 비었을 때 글', panelStrength: '상세 배경 진하기(0~1)', sdShow: 'SD 보이는 때',
-    flipText: '뒤집기 안내 글자', flipBackText: '되돌리기 안내 글자', flipTapText: '휴대폰 안내 글자', sdSize: 'SD 크기', sdPos: 'SD 위치', sdX: 'SD 가로 미세조정', sdY: 'SD 세로 미세조정', sdMobileSize: 'SD 휴대폰 크기', sdMobileX: 'SD 휴대폰 가로 미세조정', sdMobileY: 'SD 휴대폰 세로 미세조정', wantedPaper: '수배지 종이 이미지',
+    flipText: '뒤집기 안내 글자', flipBackText: '되돌리기 안내 글자', flipTapText: '휴대폰 안내 글자', sdSize: 'SD 크기', sdPos: 'SD 위치', sdX: 'SD 가로 미세조정', sdY: 'SD 세로 미세조정', sdMobileSize: 'SD 휴대폰 크기', sdMobileX: 'SD 휴대폰 가로 미세조정', sdMobileY: 'SD 휴대폰 세로 미세조정', bgm: '배경음악 (유튜브 플레이리스트 · 영상 주소)', bgmVolume: '배경음악 소리 크기', wantedPaper: '수배지 종이 이미지',
     color: '대표색', subColor: '보조색', textColor: '글자색', cardTitle: '카드 큰 글자', cardSub: '카드 작은 글자',
     sd: 'SD 이미지', tile: '타일 이미지', tilePosition: '타일 사진 위치', name: '이름', nameEn: '영문 이름 / 직책',
     intro: '한 줄 소개', tags: '태그', seat: '좌석', gate: '입구', row: '열', number: '카드 번호',
@@ -84,6 +84,7 @@
     'artworks.story': '연결할 이야기', 'artworks.hideText': '가린 그림 위 글 (비우면 기본)',
     'galleryPage.label': '왼쪽 위 라벨', 'galleryPage.heading': '큰 제목', 'galleryPage.subText': '큰 제목 아래 글',
     'galleryPage.emptyText': '그림이 없을 때 글', 'galleryPage.hideText': '가린 그림 위 기본 글',
+    'characterPage.bgm': '캐릭터 배경음악 쓰기 (캐릭터마다 \'배경음악\' 칸에 유튜브 주소)',
     'galleryPage.pointColor': 'AU · 버튼 강조색', 'galleryPage.order': '그림 보이는 순서', 'galleryPage.menu': '메인 메뉴에 자동으로 붙이기 (편집기 메인 메뉴로 옮긴 뒤엔 꺼져요)',
     'galleryPage.menuTitle': '메인 메뉴 이름', 'galleryPage.menuDesc': '메인 메뉴 설명', 'galleryPage.menuIcon': '메인 메뉴 아이콘', 'storyPage.menu': '메인 메뉴에 자동으로 붙이기 (편집기 메인 메뉴로 옮긴 뒤엔 꺼져요)',
     'storyPage.menuTitle': '메인 메뉴 이름', 'storyPage.menuDesc': '메인 메뉴 설명', 'storyPage.menuIcon': '메인 메뉴 아이콘'
@@ -693,7 +694,8 @@
     sdY: { min: -200, max: 200, step: 5, unit: 'px', def: 0, page: true, hint: '− 위 · + 아래' },
     sdMobileSize: { min: 30, max: 150, step: 5, unit: '%', def: 90, page: true, hint: '휴대폰에서 PC 크기 대비' },
     sdMobileX: { min: -150, max: 150, step: 5, unit: 'px', def: 0, page: true, hint: '휴대폰만 · − 왼쪽 · + 오른쪽' },
-    sdMobileY: { min: -150, max: 150, step: 5, unit: 'px', def: 0, page: true, hint: '휴대폰만 · − 위 · + 아래' }
+    sdMobileY: { min: -150, max: 150, step: 5, unit: 'px', def: 0, page: true, hint: '휴대폰만 · − 위 · + 아래' },
+    bgmVolume: { min: 0, max: 100, step: 5, unit: '%', def: 40, hint: '캐릭터 배경음악 소리 크기' }
   };
 
   /* SD 칸 (크기 · 위치 · 미세조정)을 SD 이미지 바로 아래에 꺼내 둬요 */
@@ -739,6 +741,8 @@
       if (key === 'galleryPage') ensureAfter(obj, 'thumbRatio', { order: 'new' });
       if (key === 'storyPage') ensureAfter(obj, 'pointColor', { lineColor: '', hoverColor: '', cardOpacity: 85 });
       if ((key === 'characters' || key === 'owner') && 'sd' in obj) ensureAfter(obj, 'sd', { sdSize: '', sdPos: '', sdX: '', sdY: '', sdMobileSize: '', sdMobileX: '', sdMobileY: '' });
+      if (key === 'characters') ensureAfter(obj, 'sdMobileY' in obj ? 'sdMobileY' : ('sd' in obj ? 'sd' : 'image'), { bgm: '' });
+      if (key === 'characterPage') ensureAfter(obj, 'sdMobileY' in obj ? 'sdMobileY' : 'sdShow', { bgm: true, bgmVolume: 40 });
       if (key === 'characterPage' && 'sdShow' in obj) ensureAfter(obj, 'sdSize' in obj ? 'sdSize' : 'sdShow',
         'sdSize' in obj ? { sdPos: 'rb', sdX: 0, sdY: 0, sdMobileSize: 90, sdMobileX: 0, sdMobileY: 0 } : { sdSize: 230, sdPos: 'rb', sdX: 0, sdY: 0, sdMobileSize: 90, sdMobileX: 0, sdMobileY: 0 });
       /* 갤러리 항목이면 '보이는 위치' 맞추기 상자를 붙여요 */
