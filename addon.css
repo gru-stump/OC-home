@@ -234,7 +234,7 @@ img.oc-crop {
   display: flex;
   align-items: center;
   gap: 4px;
-  max-width: min(360px, calc(100vw - 48px));
+  max-width: min(420px, calc(100vw - 24px));
   padding: 5px 6px 5px 5px;
   border-radius: 999px;
   background: var(--deco);
@@ -296,6 +296,16 @@ img.oc-crop {
 .oc-bgm-btn svg { width: 16px; height: 16px; }
 .oc-bgm-btn[hidden] { display: none; }
 .oc-bgm-mute.is-off { opacity: .55; }
+/* 소리 크기 막대 */
+.oc-bgm-vol {
+  -webkit-appearance: none; appearance: none;
+  width: 64px; height: 4px; margin: 0 8px 0 2px; border-radius: 4px; cursor: pointer;
+  background: linear-gradient(to right, currentColor var(--v, 40%), rgba(255,255,255,.22) var(--v, 40%));
+  color: inherit;
+}
+.oc-bgm-vol::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: currentColor; border: 0; }
+.oc-bgm-vol::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: currentColor; border: 0; }
+.oc-bgm.is-blocked .oc-bgm-vol { display: none; }
 /* 브라우저가 자동 재생을 막았을 때 */
 .oc-bgm-tap {
   display: none;
@@ -314,5 +324,6 @@ img.oc-crop {
 .oc-bgm.is-blocked .oc-bgm-btn { display: none; }
 @media (max-width: 768px) {
   .oc-bgm { left: 12px; bottom: 12px; }
-  .oc-bgm-title { max-width: 120px; }
+  .oc-bgm-title { max-width: 96px; }
+  .oc-bgm-vol { width: 48px; }
 }

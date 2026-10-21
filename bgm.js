@@ -6,12 +6,12 @@
        플레이리스트 주소 : https://www.youtube.com/playlist?list=PL…
        영상 주소         : https://www.youtube.com/watch?v=…  /  https://youtu.be/…
    · 다른 캐릭터로 넘기면 그 캐릭터 음악으로 바뀌고, 캐릭터 소개를 나가면 멈춰요.
-   · 왼쪽 아래 작은 플레이어에서 재생/멈춤 · 다음 곡 · 음소거를 할 수 있어요.
+   · 왼쪽 아래 작은 플레이어에서 재생/멈춤 · 다음 곡 · 음소거 · 소리 크기를 바꿀 수 있어요.
    · 브라우저 규칙상, 사이트에 처음 들어오자마자는 소리가 막힐 수 있어요.
      그럴 땐 '눌러서 음악 재생' 표시가 뜨고, 한 번 누르면 이어서 재생돼요.
    ========================================================= */
 window.OC_BGM = (function () {
-  var MUTE_KEY = "oc-bgm-muted";
+  var MUTE_KEY = "oc-bgm-muted", VOL_KEY = "oc-bgm-vol";
   var player = null, apiReady = false, apiLoading = false, pending = null;
   var current = "", ui = null, wanted = false, volume = 40;
 
@@ -30,6 +30,10 @@ window.OC_BGM = (function () {
   function keyOf(p) { return p ? p.list + "|" + p.video : ""; }
   function muted() { try { return localStorage.getItem(MUTE_KEY) === "1"; } catch (e) { return false; } }
   function setMuted(v) { try { localStorage.setItem(MUTE_KEY, v ? "1" : "0"); } catch (e) {} }
+  /* 방문자가 플레이어에서 직접 맞춘 소리 크기 (이 기기에만 기억) */
+  function myVol() { try { var v = localStorage.getItem(VOL_KEY); return v == null ? null : Number(v); } catch (e) { return null; } }
+  function setMyVol(v) { try { if (v == null) localStorage.removeItem(VOL_KEY); else localStorage.setItem(VOL_KEY, String(v)); } catch (e) {} }
+  function clamp(v) { v = parseFloat(v); return isFinite(v) ? Math.max(0, Math.min(100, v)) : null; }
 
   /* ----- 유튜브 플레이어 준비 ----- */
   function loadApi() {
@@ -65,7 +69,8 @@ window.OC_BGM = (function () {
       '<div class="oc-bgm-info"><small>NOW PLAYING</small><b class="oc-bgm-title">…</b></div>' +
       '<button type="button" class="oc-bgm-btn oc-bgm-toggle" aria-label="재생 / 멈춤">' + IC.pause + '</button>' +
       '<button type="button" class="oc-bgm-btn oc-bgm-next" aria-label="다음 곡">' + IC.next + '</button>' +
-      '<button type="button" class="oc-bgm-btn oc-bgm-mute" aria-label="소리 켜기 / 끄기">' + IC.sound + '</button>';
+      '<button type="button" class="oc-bgm-btn oc-bgm-mute" aria-label="소리 켜기 / 끄기">' + IC.sound + '</button>' +
+      '<input type="range" class="oc-bgm-vol" min="0" max="100" step="5" aria-label="소리 크기">';
     document.body.appendChild(ui);
     ui.querySelector(".oc-bgm-toggle").addEventListener("click", function () {
       if (!player || !player.getPlayerState) return;
@@ -77,10 +82,26 @@ window.OC_BGM = (function () {
       if (player) { if (m) player.mute(); else { player.unMute(); player.setVolume(volume); } }
       paint();
     });
+    var vr = ui.querySelector(".oc-bgm-vol");
+    vr.addEventListener("input", function () {
+      volume = Number(vr.value); setMyVol(volume);
+      if (player && player.setVolume) {
+        player.setVolume(volume);
+        if (volume > 0 && muted()) { setMuted(false); player.unMute(); }
+      }
+      paintVol(); paint();
+    });
     ui.querySelector(".oc-bgm-tap").addEventListener("click", function () {
       if (player && player.playVideo) { if (!muted()) player.unMute(); player.playVideo(); }
     });
+    paintVol();
     return ui;
+  }
+  function paintVol() {
+    if (!ui) return;
+    var vr = ui.querySelector(".oc-bgm-vol");
+    vr.value = volume;
+    vr.style.setProperty("--v", volume + "%");
   }
   function paint(state) {
     if (!ui) return;
@@ -158,20 +179,26 @@ window.OC_BGM = (function () {
   return {
     parse: parse,
     /* 캐릭터 화면에서 호출 : set(캐릭터의 bgm 값, 캐릭터 페이지 설정) */
-    set: function (src, P) {
+    /* set(캐릭터의 bgm 값, 캐릭터 페이지 설정, 캐릭터별 소리 크기)
+       소리 크기 순서 : 방문자가 직접 맞춘 값 → 캐릭터별 값 → 캐릭터 페이지 기본값 → 40 */
+    set: function (src, P, charVol) {
       P = P || {};
       if (P.bgm === false) return stop();
-      var v = parseFloat(P.bgmVolume);
-      volume = isFinite(v) ? Math.max(0, Math.min(100, v)) : 40;
+      var mine = clamp(myVol()), cv = clamp(charVol === "" ? null : charVol), pv = clamp(P.bgmVolume);
+      volume = mine != null ? mine : (cv != null ? cv : (pv != null ? pv : 40));
+      paintVol();
       var p = parse(src);
       if (!p) return stop();
       wanted = true;
       var k = keyOf(p);
-      if (k === current) { retry(); return; }   /* 같은 음악이면 그대로 */
+      if (k === current) { if (player && player.setVolume) player.setVolume(volume); retry(); return; }   /* 같은 음악이면 그대로 */
       current = k;
       start(p);
+      paintVol();
       if (player && player.setVolume) player.setVolume(volume);
     },
-    stop: stop
+    stop: stop,
+    /* 내가 플레이어에서 맞춘 소리 크기 지우고 편집기 기본값으로 */
+    resetMyVolume: function () { setMyVol(null); }
   };
 })();

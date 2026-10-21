@@ -22,7 +22,7 @@
   <!-- 새로 더한 기능 (갤러리 자르기 등) -->
   <script src="addon.js"></script>
   <!-- 캐릭터 배경음악 (유튜브 플레이리스트) -->
-  <script src="bgm.js"></script>
+  <script src="bgm.js?v=2"></script>
   <!-- 스토리 페이지(#story) -->
   <script src="story.js"></script>
   <!-- 갤러리 페이지(#gallery) -->
@@ -983,7 +983,7 @@
         if (window.OC_FLIPTIP) OC_FLIPTIP.attach(document.getElementById("cdFlip"), S.characterPage);   /* 뒤집기 안내 (addon.js) */
         if (type === "custom") sizeCustom(ch);
         renderDetail(ch, i);
-        if (window.OC_BGM) OC_BGM.set(ch.bgm, S.characterPage);   /* 캐릭터 배경음악 (bgm.js) */
+        if (window.OC_BGM) OC_BGM.set(ch.bgm, S.characterPage, ch.bgmVolume);   /* 캐릭터 배경음악 (bgm.js) */
 
         count.textContent = String(i + 1).padStart(2, "0") + " / " + String(list.length).padStart(2, "0");
         Array.prototype.forEach.call(tilesBox.children, function (t, n) {
@@ -2296,7 +2296,7 @@
       var v = view(); if (!v) return;
       if (window.OHAdmin) return window.OHAdmin.mount(v);
       var s = document.createElement('script');
-      s.src = 'admin.js?v=4';
+      s.src = 'admin.js?v=5';
       s.onload = function () { window.OHAdmin.mount(v); };
       document.body.appendChild(s);
     }
