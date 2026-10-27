@@ -6,6 +6,7 @@
        플레이리스트 주소 : https://www.youtube.com/playlist?list=PL…
        영상 주소         : https://www.youtube.com/watch?v=…  /  https://youtu.be/…
    · 다른 캐릭터로 넘기면 그 캐릭터 음악으로 바뀌고, 캐릭터 소개를 나가면 멈춰요.
+   · 새 곡은 2.5초 동안 천천히 커지고(페이드 인), 바꾸거나 나갈 땐 0.5초 동안 줄어들어요.
    · 왼쪽 아래 작은 플레이어에서 재생/멈춤 · 다음 곡 · 음소거 · 소리 크기를 바꿀 수 있어요.
    · 브라우저 규칙상, 사이트에 처음 들어오자마자는 소리가 막힐 수 있어요.
      그럴 땐 '눌러서 음악 재생' 표시가 뜨고, 한 번 누르면 이어서 재생돼요.
@@ -43,7 +44,7 @@ window.OC_BGM = (function () {
     window.onYouTubeIframeAPIReady = function () {
       apiReady = true;
       if (typeof prev === "function") prev();
-      if (pending) { var p = pending; pending = null; start(p); }
+      if (pending) { pending = false; apply(); }
     };
     var s = document.createElement("script");
     s.src = "https://www.youtube.com/iframe_api";
@@ -79,14 +80,15 @@ window.OC_BGM = (function () {
     ui.querySelector(".oc-bgm-next").addEventListener("click", function () { if (player && player.nextVideo) player.nextVideo(); });
     ui.querySelector(".oc-bgm-mute").addEventListener("click", function () {
       var m = !muted(); setMuted(m);
-      if (player) { if (m) player.mute(); else { player.unMute(); player.setVolume(volume); } }
+      if (ready()) { if (m) player.mute(); else player.unMute(); }
       paint();
     });
     var vr = ui.querySelector(".oc-bgm-vol");
     vr.addEventListener("input", function () {
       volume = Number(vr.value); setMyVol(volume);
-      if (player && player.setVolume) {
-        player.setVolume(volume);
+      fadeNext = false;
+      if (ready()) {
+        setNow(volume);
         if (volume > 0 && muted()) { setMuted(false); player.unMute(); }
       }
       paintVol(); paint();
@@ -118,28 +120,65 @@ window.OC_BGM = (function () {
     ui.querySelector(".oc-bgm-next").hidden = !(pl && pl.length > 1);
   }
 
-  function start(p) {
-    if (!apiReady) { pending = p; loadApi(); return; }
+  /* ----- 소리 천천히 키우기 · 줄이기 (페이드) ----- */
+  var FADE_IN = 2500, FADE_OUT = 500;   /* 밀리초 : 2.5초 동안 커지고, 0.5초 동안 작아져요 */
+  var fadeTimer = null, fadeNext = false, shown = 0;
+  function fade(to, ms, done) {
+    clearInterval(fadeTimer); fadeTimer = null;
+    if (!ready()) { if (done) done(); return; }
+    var from = shown, t0 = Date.now();
+    if (ms <= 0 || from === to) { shown = to; player.setVolume(to); if (done) done(); return; }
+    fadeTimer = setInterval(function () {
+      var k = Math.min(1, (Date.now() - t0) / ms);
+      shown = Math.round(from + (to - from) * k);
+      player.setVolume(shown);
+      if (k >= 1) { clearInterval(fadeTimer); fadeTimer = null; if (done) done(); }
+    }, 50);
+  }
+  function setNow(v) { clearInterval(fadeTimer); fadeTimer = null; shown = v; if (ready()) player.setVolume(v); }
+
+  /* ----- 플레이어는 딱 하나만 : 준비가 끝나기 전에 바뀐 요청은 '가장 마지막 것'만 반영 ----- */
+  var isReady = false, want = null, loaded = "", loadSeq = 0;
+  function ready() { return !!(player && isReady); }
+
+  function apply() {
+    if (!want) return;
+    if (!apiReady) { pending = true; loadApi(); return; }
     makeUi();
     ui.classList.add("is-on");
+    if (!player) return create(want);
+    if (!isReady) return;                        /* onReady 에서 다시 apply() 해요 */
+    if (loaded === keyOf(want)) return;
+    var p = want, seq = ++loadSeq;
+    var playing = player.getPlayerState && player.getPlayerState() === 1;
+    /* 지금 곡을 살짝 줄인 다음 새 곡으로 */
+    fade(0, playing ? FADE_OUT : 0, function () {
+      if (seq !== loadSeq || want !== p) return; /* 그 사이에 또 바뀌었으면 취소 */
+      loaded = keyOf(p);
+      fadeNext = true; shown = 0; player.setVolume(0);
+      if (p.list) { player.loadPlaylist({ list: p.list, listType: "playlist", index: 0 }); if (player.setLoop) player.setLoop(true); }
+      else player.loadVideoById(p.video);
+    });
+  }
+
+  function create(p) {
     var vars = { autoplay: 1, controls: 0, disablekb: 1, fs: 0, modestbranding: 1, playsinline: 1, rel: 0, loop: 1 };
     if (p.list) { vars.listType = "playlist"; vars.list = p.list; }
     else vars.playlist = p.video;                 /* 영상 하나도 반복되게 */
-    if (player && player.loadPlaylist) {
-      if (p.list) player.loadPlaylist({ list: p.list, listType: "playlist", index: 0 });
-      else player.loadVideoById(p.video);
-      return;
-    }
+    loaded = keyOf(p);
     player = new YT.Player("ocBgmPlayer", {
       width: 64, height: 36,
       videoId: p.video || undefined,
       playerVars: vars,
       events: {
         onReady: function (e) {
-          e.target.setVolume(volume);
+          isReady = true;
+          fadeNext = true; shown = 0; e.target.setVolume(0);
           if (muted()) e.target.mute();
           if (p.list && e.target.setLoop) e.target.setLoop(true);
-          if (wanted) e.target.playVideo();
+          if (want && loaded !== keyOf(want)) apply();   /* 준비 중에 다른 캐릭터로 바뀌었으면 그걸로 */
+          else if (want) e.target.playVideo();
+          else e.target.pauseVideo();
           setTimeout(paint, 600);
         },
         onStateChange: function (e) {
@@ -147,7 +186,10 @@ window.OC_BGM = (function () {
             var pl = e.target.getPlaylist && e.target.getPlaylist();
             if (!pl || pl.length < 2) { e.target.seekTo(0); e.target.playVideo(); }
           }
-          if (!wanted && e.data === 1) e.target.pauseVideo();
+          if (e.data === 1) {
+            if (!want) e.target.pauseVideo();
+            else if (fadeNext) { fadeNext = false; fade(volume, FADE_IN); }   /* 새 곡 시작 : 천천히 커지게 */
+          }
           paint(e.data);
         },
         onError: function () { paint(); }
@@ -155,15 +197,21 @@ window.OC_BGM = (function () {
     });
   }
 
-  /* 첫 클릭 · 키 입력 때 막혀 있던 재생을 다시 시도 */
-  function retry() {
-    if (wanted && player && player.getPlayerState && player.getPlayerState() !== 1) {
+  /* 첫 클릭 · 키 입력 때 막혀 있던 재생을 다시 시도
+     (클릭으로 캐릭터가 바뀌는 경우가 있어서, 클릭 처리가 끝난 뒤에 시도해요) */
+  function retry(ev) {
+    if (ev && ev.target && ev.target.closest && ev.target.closest(".oc-bgm")) return;   /* 플레이어 버튼은 제외 */
+    setTimeout(function () {
+      if (!want || !ready() || loaded !== keyOf(want)) return;
+      var s = player.getPlayerState && player.getPlayerState();
+      if (s !== -1 && s !== 5) return;           /* 막혀서 시작 못 한 경우만 (일부러 멈춘 건 그대로) */
       if (!muted()) player.unMute();
       player.playVideo();
-    }
+    }, 80);
   }
-  document.addEventListener("pointerdown", retry, true);
+  document.addEventListener("click", retry, true);
   document.addEventListener("keydown", retry, true);
+  document.addEventListener("touchend", retry, true);
 
   /* 캐릭터 소개를 나가면 멈춤 */
   window.addEventListener("hashchange", function () {
@@ -171,14 +219,19 @@ window.OC_BGM = (function () {
   });
 
   function stop() {
-    wanted = false; current = "";
-    if (player && player.pauseVideo) player.pauseVideo();
+    want = null; wanted = false; current = ""; ++loadSeq;
     if (ui) ui.classList.remove("is-on");
+    if (!ready()) return;
+    var s = player.getPlayerState && player.getPlayerState();
+    fade(0, s === 1 ? FADE_OUT : 0, function () {
+      if (want) return;                          /* 그 사이에 다시 들어왔으면 그대로 */
+      player.pauseVideo();
+      loaded = "";                               /* 다시 들어오면 처음부터 천천히 */
+    });
   }
 
   return {
     parse: parse,
-    /* 캐릭터 화면에서 호출 : set(캐릭터의 bgm 값, 캐릭터 페이지 설정) */
     /* set(캐릭터의 bgm 값, 캐릭터 페이지 설정, 캐릭터별 소리 크기)
        소리 크기 순서 : 방문자가 직접 맞춘 값 → 캐릭터별 값 → 캐릭터 페이지 기본값 → 40 */
     set: function (src, P, charVol) {
@@ -191,11 +244,12 @@ window.OC_BGM = (function () {
       if (!p) return stop();
       wanted = true;
       var k = keyOf(p);
-      if (k === current) { if (player && player.setVolume) player.setVolume(volume); retry(); return; }   /* 같은 음악이면 그대로 */
-      current = k;
-      start(p);
-      paintVol();
-      if (player && player.setVolume) player.setVolume(volume);
+      if (want && keyOf(want) === k) {           /* 같은 음악이면 그대로, 소리 크기만 맞추기 */
+        if (ready() && !fadeTimer && !fadeNext) setNow(volume);
+        return;
+      }
+      want = p; current = k;
+      apply();
     },
     stop: stop,
     /* 내가 플레이어에서 맞춘 소리 크기 지우고 편집기 기본값으로 */
