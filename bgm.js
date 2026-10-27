@@ -154,24 +154,35 @@ window.OC_BGM = (function () {
     /* 지금 곡을 살짝 줄인 다음 새 곡으로 */
     fade(0, playing ? FADE_OUT : 0, function () {
       if (seq !== loadSeq || want !== p) return; /* 그 사이에 또 바뀌었으면 취소 */
-      loaded = keyOf(p);
-      fadeNext = true; shown = 0; player.setVolume(0);
-      if (p.list) { player.loadPlaylist({ list: p.list, listType: "playlist", index: 0 }); if (player.setLoop) player.setLoop(true); }
-      else player.loadVideoById(p.video);
+      /* 유튜브의 loadPlaylist 는 바로 앞 목록을 다시 트는 문제가 있어서,
+         곡이 바뀔 땐 플레이어를 새로 만들어요 (항상 정확한 곡이 나오게) */
+      renew(p);
     });
   }
 
+  function renew(p) {
+    var old = player;
+    player = null; isReady = false;
+    clearInterval(fadeTimer); fadeTimer = null;
+    try { if (old && old.destroy) old.destroy(); } catch (e) {}
+    var art = ui.querySelector(".oc-bgm-art");
+    art.innerHTML = '<div id="ocBgmPlayer"></div>';
+    create(p);
+  }
+
   function create(p) {
+    isReady = false;
     var vars = { autoplay: 1, controls: 0, disablekb: 1, fs: 0, modestbranding: 1, playsinline: 1, rel: 0, loop: 1 };
     if (p.list) { vars.listType = "playlist"; vars.list = p.list; }
     else vars.playlist = p.video;                 /* 영상 하나도 반복되게 */
     loaded = keyOf(p);
-    player = new YT.Player("ocBgmPlayer", {
+    var me = player = new YT.Player("ocBgmPlayer", {
       width: 64, height: 36,
       videoId: p.video || undefined,
       playerVars: vars,
       events: {
         onReady: function (e) {
+          if (player !== me) return;               /* 이미 바뀐 옛 플레이어면 무시 */
           isReady = true;
           fadeNext = true; shown = 0; e.target.setVolume(0);
           if (muted()) e.target.mute();
@@ -182,6 +193,7 @@ window.OC_BGM = (function () {
           setTimeout(paint, 600);
         },
         onStateChange: function (e) {
+          if (player !== me) return;
           if (e.data === 0) {                       /* 끝나면 처음부터 (영상 하나일 때) */
             var pl = e.target.getPlaylist && e.target.getPlaylist();
             if (!pl || pl.length < 2) { e.target.seekTo(0); e.target.playVideo(); }
@@ -192,7 +204,7 @@ window.OC_BGM = (function () {
           }
           paint(e.data);
         },
-        onError: function () { paint(); }
+        onError: function () { if (player === me) paint(); }
       }
     });
   }
@@ -224,7 +236,7 @@ window.OC_BGM = (function () {
     if (!ready()) return;
     var s = player.getPlayerState && player.getPlayerState();
     fade(0, s === 1 ? FADE_OUT : 0, function () {
-      if (want) return;                          /* 그 사이에 다시 들어왔으면 그대로 */
+      if (want || !ready()) return;              /* 그 사이에 다시 들어왔으면 그대로 */
       player.pauseVideo();
       loaded = "";                               /* 다시 들어오면 처음부터 천천히 */
     });
